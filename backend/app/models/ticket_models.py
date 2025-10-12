@@ -10,8 +10,129 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
+from pydantic import BaseModel, Field
+from typing import Optional, List
 
 Base = declarative_base()
+
+# ============================================================================
+# ENUMS
+# ============================================================================
+
+class TicketSource(enum.Enum):
+    """Source of ticket creation"""
+    CHAT = "chat"
+    EMAIL = "email"
+    GLPI = "glpi"
+    SOLMAN = "solman"
+    WEB_FORM = "web_form"
+    API = "api"
+
+class TicketStatus(enum.Enum):
+    """Ticket status lifecycle"""
+    NEW = "new"
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    PENDING_USER = "pending_user"
+    PENDING_VENDOR = "pending_vendor"
+    RESOLVED = "resolved"
+    CLOSED = "closed"
+    REOPENED = "reopened"
+
+class TicketPriority(enum.Enum):
+    """Ticket priority levels"""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+    URGENT = "urgent"
+
+class TicketCategory(enum.Enum):
+    """Ticket categories for classification"""
+    NETWORK = "network"
+    HARDWARE = "hardware"
+    SOFTWARE = "software"
+    PASSWORD_RESET = "password_reset"
+    ACCESS_REQUEST = "access_request"
+    SAP_ERROR = "sap_error"
+    PRINTER = "printer"
+    EMAIL = "email"
+    VPN = "vpn"
+    HR_QUERY = "hr_query"
+    FINANCE = "finance"
+    GENERAL = "general"
+    OTHER = "other"
+
+# ============================================================================
+# PYDANTIC MODELS (API)
+# ============================================================================
+
+class Priority(str, enum.Enum):
+    """Pydantic-compatible priority enum"""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+    URGENT = "urgent"
+
+class Status(str, enum.Enum):
+    """Pydantic-compatible status enum"""
+    NEW = "new"
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    PENDING_USER = "pending_user"
+    PENDING_VENDOR = "pending_vendor"
+    RESOLVED = "resolved"
+    CLOSED = "closed"
+    REOPENED = "reopened"
+
+class TicketCreate(BaseModel):
+    """Request model for creating tickets"""
+    title: str = Field(..., min_length=1, max_length=200)
+    description: str = Field(..., min_length=1)
+    category: Optional[str] = "general"
+    priority: Priority = Priority.MEDIUM
+    source: str = "web_form"
+    requester_email: Optional[str] = None
+    requester_name: Optional[str] = None
+    requester_phone: Optional[str] = None
+    assigned_to: Optional[str] = None
+    external_id: Optional[str] = None
+    tags: Optional[List[str]] = []
+
+class TicketUpdate(BaseModel):
+    """Request model for updating tickets"""
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    priority: Optional[Priority] = None
+    status: Optional[Status] = None
+    assigned_to: Optional[str] = None
+    resolution: Optional[str] = None
+    tags: Optional[List[str]] = None
+
+class TicketResponse(BaseModel):
+    """Response model for tickets"""
+    id: str
+    ticket_number: str
+    title: str
+    description: str
+    category: str
+    priority: str
+    status: str
+    source: str
+    requester_email: Optional[str]
+    requester_name: Optional[str]
+    assigned_to: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    resolved_at: Optional[datetime]
+    sla_deadline: Optional[datetime]
+    tags: List[str] = []
+
+# ============================================================================
+# CORE TICKET MODEL
+# ============================================================================
 
 # ============================================================================
 # ENUMS

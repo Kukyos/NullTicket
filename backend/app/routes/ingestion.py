@@ -4,7 +4,7 @@ Ticket ingestion endpoints from various sources
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List, Dict
 from datetime import datetime
 import uuid
 
@@ -12,6 +12,7 @@ from ..database import get_db
 from ..models.ticket_models import Ticket, TicketSource
 from ..services.classification_service import classification_service
 from ..services.routing_service import routing_service
+from ..services.chat_service import chat_service
 from ..config import settings
 
 router = APIRouter()
@@ -37,6 +38,10 @@ class ExternalTicketRequest(BaseModel):
     source: str  # glpi or solman
     priority: Optional[str] = None
     category: Optional[str] = None
+
+class ChatMessage(BaseModel):
+    message: str
+    context: Optional[List[Dict]] = None
 
 @router.post("/chatbot")
 async def ingest_from_chatbot(
@@ -258,6 +263,14 @@ async def ingest_from_solman(
     db.refresh(ticket)
     
     return {"success": True, "ticket_number": ticket.ticket_number}
+
+@router.post("/chat")
+async def chat_with_ai(request: ChatMessage):
+    """
+    Chat with AI assistant for IT support
+    """
+    response = chat_service.chat(request.message, request.context)
+    return {"response": response, "success": True}
 
 @router.get("/sync/status")
 async def get_sync_status(db: Session = Depends(get_db)):

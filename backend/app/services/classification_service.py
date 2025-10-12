@@ -251,3 +251,10 @@ RESPOND ONLY IN THIS JSON FORMAT (no markdown, no extra text):
 
 # Global instance
 classification_service = TicketClassificationService()
+
+# Module-level function for easy importing
+async def classify_ticket(title: str, description: str, source: str = "unknown") -> Dict:
+    """
+    Convenience function to classify a ticket using the global service instance
+    """
+    return classification_service.classify_ticket(title, description, source)

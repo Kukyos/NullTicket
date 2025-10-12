@@ -55,6 +55,14 @@ app.include_router(ingestion.router, prefix="/api/ingest", tags=["Ingestion"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 
+# Import and include knowledge base router
+from .routes import kb
+app.include_router(kb.router, prefix="/api/kb", tags=["Knowledge Base"])
+
+# Import and include webhooks router
+from .routes import webhooks
+app.include_router(webhooks.router, prefix="/api/webhooks", tags=["Webhooks"])
+
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """Root endpoint with system information"""
@@ -236,7 +244,8 @@ async def database_health(db = Depends(get_db)):
     """Check database connectivity"""
     try:
         # Simple query to test connection
-        db.execute("SELECT 1")
+        from sqlalchemy import text
+        db.execute(text("SELECT 1"))
         return {"status": "connected", "timestamp": datetime.utcnow()}
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Database connection failed: {str(e)}")
