@@ -1,0 +1,41 @@
+# Core Framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pydantic==2.9.2
+python-multipart==0.0.6
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.13.1
+psycopg2-binary==2.9.9  # PostgreSQL driver
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
+
+# AI & NLP
+requests==2.31.0
+google-generativeai==0.3.2
+googletrans==4.0.0rc1
+
+# Email Processing
+email-validator==2.1.0
+aiosmtplib==3.0.1
+
+# Background Tasks
+celery==5.3.4
+redis==5.0.1
+
+# API Integrations
+httpx==0.25.2
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2023.3
+
+# SMS (Optional)
+twilio==8.11.1
+
+# Monitoring
+prometheus-client==0.19.0
