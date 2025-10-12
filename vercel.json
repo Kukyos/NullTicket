@@ -1,9 +1,12 @@
 {
+  "version": 2,
   "name": "nullticket-frontend",
-  "version": "1.0.0",
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "framework": "nextjs",
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/next"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/:path*",
