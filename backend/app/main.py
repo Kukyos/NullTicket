@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from datetime import datetime
 import logging
+import os
 
 from .config import settings
 from .database import init_db, get_db
@@ -41,6 +42,15 @@ app.add_middleware(
 async def startup_event():
     """Initialize database and services on startup"""
     logger.info("🚀 Starting NullTicket System...")
+    
+    # Debug: Log environment variables
+    logger.info("Environment variables:")
+    for key, value in os.environ.items():
+        if 'DATABASE' in key.upper() or 'GROQ' in key.upper():
+            logger.info(f"  {key}: {value}")
+        elif key in ['PORT', 'RAILWAY_ENVIRONMENT']:
+            logger.info(f"  {key}: {value}")
+    
     init_db()
     logger.info("✅ Database initialized")
     logger.info(f"📊 Running on: {settings.DATABASE_URL}")
