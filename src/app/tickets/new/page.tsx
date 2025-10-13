@@ -88,7 +88,7 @@ export default function NewTicket() {
       if (err instanceof Error) {
         // Handle specific error types
         if (err.message.includes('Failed to fetch')) {
-          errorMessage = 'NETWORK_ERROR: Unable to connect to the server. Please check your internet connection and try again. If the problem persists, the server may be temporarily unavailable.';
+          errorMessage = `FETCH_ERROR: ${err.message} - This usually means the server is unreachable or there's a network issue. API URL: ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}`;
         } else if (err.message.includes('BACKEND_ERROR')) {
           errorMessage = err.message;
         } else if (err.message.includes('INVALID_RESPONSE')) {
