@@ -43,15 +43,22 @@ export default function NewTicket() {
 
       console.log('Ticket creation response:', response);
 
-      // Check if response is an empty array (backend bug)
-      if (Array.isArray(response) && response.length === 0) {
-        throw new Error('BACKEND_ERROR: The server returned an empty response. This indicates a backend configuration issue. Please contact support or try again later.');
+      // Check for specific backend bugs first
+      if (Array.isArray(response)) {
+        if (response.length === 0) {
+          throw new Error('BACKEND_ERROR: The server returned an empty response. This indicates a backend configuration issue where ticket creation is not working properly. The server needs to be updated.');
+        } else {
+          throw new Error('INVALID_RESPONSE: The server returned an array instead of ticket data. Expected a single ticket object, but received: ' + JSON.stringify(response));
+        }
       }
 
       // Check if response has expected ticket structure
-      if (!response || typeof response !== 'object' || !response.ticket_number) {
-        console.error('Unexpected response format:', response);
-        throw new Error('INVALID_RESPONSE: The server returned an unexpected response format. Expected ticket data with ticket_number, but received: ' + JSON.stringify(response));
+      if (!response || typeof response !== 'object') {
+        throw new Error('INVALID_RESPONSE: The server returned an invalid response type. Expected ticket object, but received: ' + typeof response + ' - ' + JSON.stringify(response));
+      }
+
+      if (!response.ticket_number) {
+        throw new Error('INVALID_RESPONSE: The server response is missing the ticket_number field. This indicates the ticket was not created successfully. Response received: ' + JSON.stringify(response));
       }
 
       setSuccess(true);
