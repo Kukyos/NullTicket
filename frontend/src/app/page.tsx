@@ -1,10 +1,33 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Zap, Brain, GitBranch, Mail, MessageSquare, BarChart3 } from 'lucide-react';
+import { Shield, Zap, Brain, GitBranch, Mail, MessageSquare, BarChart3, CheckCircle, XCircle, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
+  const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
+  const [apiHealth, setApiHealth] = useState<any>(null);
+
+  useEffect(() => {
+    checkBackendStatus();
+  }, []);
+
+  const checkBackendStatus = async () => {
+    try {
+      const response = await fetch('/api/health');
+      if (response.ok) {
+        const health = await response.json();
+        setBackendStatus('connected');
+        setApiHealth(health);
+      } else {
+        setBackendStatus('disconnected');
+      }
+    } catch (error) {
+      setBackendStatus('disconnected');
+      console.error('Backend check failed:', error);
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950/20 to-gray-950">
       {/* Navigation */}
@@ -112,6 +135,75 @@ export default function Home() {
             </div>
           </motion.div>
         </div>
+      </section>
+
+      {/* Backend Status Indicators */}
+      <section className="container mx-auto px-6 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="glass p-8 rounded-2xl border border-blue-500/30 max-w-4xl mx-auto"
+        >
+          <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+            <Shield className="w-8 h-8 text-blue-400" />
+            System Status
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Backend Connection */}
+            <div className="flex items-center gap-4 p-6 bg-gray-900/50 rounded-xl border border-blue-500/20">
+              {backendStatus === 'checking' && <AlertCircle className="w-6 h-6 text-yellow-500 animate-pulse" />}
+              {backendStatus === 'connected' && <CheckCircle className="w-6 h-6 text-green-500" />}
+              {backendStatus === 'disconnected' && <XCircle className="w-6 h-6 text-red-500" />}
+              <div>
+                <p className="font-semibold text-white text-lg">Backend API</p>
+                <p className="text-sm text-gray-400">
+                  {backendStatus === 'checking' && 'Checking connection...'}
+                  {backendStatus === 'connected' && 'Connected & Ready'}
+                  {backendStatus === 'disconnected' && 'Connection Failed'}
+                </p>
+              </div>
+            </div>
+
+            {/* Database Status */}
+            <div className="flex items-center gap-4 p-6 bg-gray-900/50 rounded-xl border border-blue-500/20">
+              {apiHealth?.database === 'healthy' ? (
+                <CheckCircle className="w-6 h-6 text-green-500" />
+              ) : apiHealth?.database === 'unhealthy' ? (
+                <XCircle className="w-6 h-6 text-red-500" />
+              ) : (
+                <AlertCircle className="w-6 h-6 text-yellow-500 animate-pulse" />
+              )}
+              <div>
+                <p className="font-semibold text-white text-lg">Database</p>
+                <p className="text-sm text-gray-400">
+                  {apiHealth?.database === 'healthy' && 'PostgreSQL Connected'}
+                  {apiHealth?.database === 'unhealthy' && 'Connection Failed'}
+                  {!apiHealth?.database && 'Checking...'}
+                </p>
+              </div>
+            </div>
+
+            {/* AI Services */}
+            <div className="flex items-center gap-4 p-6 bg-gray-900/50 rounded-xl border border-blue-500/20">
+              {apiHealth?.ai_services === 'healthy' ? (
+                <CheckCircle className="w-6 h-6 text-green-500" />
+              ) : apiHealth?.ai_services === 'unhealthy' ? (
+                <XCircle className="w-6 h-6 text-red-500" />
+              ) : (
+                <AlertCircle className="w-6 h-6 text-yellow-500 animate-pulse" />
+              )}
+              <div>
+                <p className="font-semibold text-white text-lg">AI Services</p>
+                <p className="text-sm text-gray-400">
+                  {apiHealth?.ai_services === 'healthy' && 'LLaMA 3.1 Available'}
+                  {apiHealth?.ai_services === 'unhealthy' && 'Service Unavailable'}
+                  {!apiHealth?.ai_services && 'Checking...'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </section>
 
       {/* Features Section */}

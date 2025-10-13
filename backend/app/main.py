@@ -258,16 +258,41 @@ async def root():
     """
 
 @app.get("/health")
-async def health_check():
+async def health_check(db = Depends(get_db)):
     """Health check endpoint"""
+    try:
+        # Check database connectivity
+        from sqlalchemy import text
+        db.execute(text("SELECT 1"))
+        database_status = "healthy"
+    except Exception as e:
+        logger.error(f"Database health check failed: {str(e)}")
+        database_status = "unhealthy"
+
+    # Check AI services
+    try:
+        if not settings.GROQ_API_KEY:
+            ai_status = "unhealthy"
+        else:
+            # Test classification service
+            from .services.classification_service import classification_service
+            result = classification_service._fallback_classification(
+                "Test ticket",
+                "This is a test"
+            )
+            ai_status = "healthy"
+    except Exception as e:
+        logger.error(f"AI health check failed: {str(e)}")
+        ai_status = "unhealthy"
+
     return {
-        "status": "healthy",
-        "timestamp": datetime.utcnow(),
+        "status": "healthy" if database_status == "healthy" and ai_status == "healthy" else "unhealthy",
+        "database": database_status,
+        "ai_services": ai_status,
+        "timestamp": datetime.utcnow().isoformat(),
         "version": settings.APP_VERSION,
         "services": {
-            "database": "ok",
             "email": settings.EMAIL_ENABLED,
-            "ai": bool(settings.GROQ_API_KEY),
             "glpi": settings.GLPI_ENABLED,
             "solman": settings.SOLMAN_ENABLED
         }
