@@ -34,6 +34,7 @@ export default function NewTicket() {
       };
 
       console.log('Submitting ticket data:', submitData);
+      console.log('API_BASE_URL:', process.env.NEXT_PUBLIC_API_URL);
 
       const response = await fetcher('/api/tickets', {
         method: 'POST',
@@ -41,18 +42,26 @@ export default function NewTicket() {
         body: JSON.stringify(submitData)
       });
 
-      console.log('Ticket creation response:', response);
+      console.log('Raw response received:', response);
+      console.log('Response type:', typeof response);
+      console.log('Is array:', Array.isArray(response));
+      console.log('Array length:', Array.isArray(response) ? response.length : 'N/A');
 
       // TEMPORARY WORKAROUND: Handle Railway backend bug
       // Railway is returning [] instead of proper ticket data
-      if (Array.isArray(response) && response.length === 0) {
-        console.warn('Railway backend bug: returning empty array. Using temporary workaround.');
-        // Generate a fake ticket number for now
-        const fakeTicketNumber = `TICKET-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
-        console.log('Generated fake ticket number:', fakeTicketNumber);
-        setSuccess(true);
-        setTicketNumber(fakeTicketNumber);
-        return;
+      if (Array.isArray(response)) {
+        if (response.length === 0) {
+          console.warn('Railway backend bug detected: returning empty array. Using temporary workaround.');
+          // Generate a fake ticket number for now
+          const fakeTicketNumber = `TICKET-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+          console.log('Generated fake ticket number:', fakeTicketNumber);
+          setSuccess(true);
+          setTicketNumber(fakeTicketNumber);
+          return;
+        } else {
+          console.error('Unexpected array response:', response);
+          throw new Error('INVALID_RESPONSE: Server returned unexpected array data');
+        }
       }
 
       // Check for other array responses
