@@ -25,5 +25,7 @@
       ]
     }
   ],
-  "protect": false
+  "protect": {
+    "exclude": ["/api/**"]
+  }
 }
