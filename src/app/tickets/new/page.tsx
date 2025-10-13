@@ -33,22 +33,100 @@ export default function NewTicket() {
         priority: formData.priority.toUpperCase()
       };
 
+      console.log('Submitting ticket data:', submitData);
+
       const response = await fetcher('/api/tickets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(submitData)
       });
 
+      console.log('Ticket creation response:', response);
+
+      // Check if response is an empty array (backend bug)
+      if (Array.isArray(response) && response.length === 0) {
+        throw new Error('BACKEND_ERROR: The server returned an empty response. This indicates a backend configuration issue. Please contact support or try again later.');
+      }
+
+      // Check if response has expected ticket structure
+      if (!response || typeof response !== 'object' || !response.ticket_number) {
+        console.error('Unexpected response format:', response);
+        throw new Error('INVALID_RESPONSE: The server returned an unexpected response format. Expected ticket data with ticket_number, but received: ' + JSON.stringify(response));
+      }
+
       setSuccess(true);
       setTicketNumber(response.ticket_number);
     } catch (err) {
       console.error('Failed to create ticket:', err);
-      // Show actual error details for debugging
-      const errorMessage = err instanceof Error ? err.message : 
-                          (err as any)?.message || 
-                          JSON.stringify(err) || 
-                          'Unknown error occurred';
-      setError(`Failed to create ticket: ${errorMessage}`);
+      
+      let errorMessage = 'An unknown error occurred while creating your ticket.';
+      
+      if (err instanceof Error) {
+        // Handle specific error types
+        if (err.message.includes('Failed to fetch')) {
+          errorMessage = 'NETWORK_ERROR: Unable to connect to the server. Please check your internet connection and try again. If the problem persists, the server may be temporarily unavailable.';
+        } else if (err.message.includes('BACKEND_ERROR')) {
+          errorMessage = err.message;
+        } else if (err.message.includes('INVALID_RESPONSE')) {
+          errorMessage = err.message;
+        } else if (err.message.includes('HTTP')) {
+          // Parse HTTP error codes
+          const statusMatch = err.message.match(/HTTP (\d+): (.+)/);
+          if (statusMatch) {
+            const statusCode = parseInt(statusMatch[1]);
+            const statusText = statusMatch[2];
+            
+            switch (statusCode) {
+              case 400:
+                errorMessage = `VALIDATION_ERROR: Invalid ticket data (${statusCode}). Please check that all required fields are filled correctly and try again.`;
+                break;
+              case 401:
+                errorMessage = `AUTHENTICATION_ERROR: Not authorized to create tickets (${statusCode}). Please log in and try again.`;
+                break;
+              case 403:
+                errorMessage = `PERMISSION_ERROR: You don't have permission to create tickets (${statusCode}). Please contact your administrator.`;
+                break;
+              case 404:
+                errorMessage = `SERVICE_ERROR: Ticket service not found (${statusCode}). The server may be misconfigured.`;
+                break;
+              case 429:
+                errorMessage = `RATE_LIMIT_ERROR: Too many requests (${statusCode}). Please wait a moment and try again.`;
+                break;
+              case 500:
+                errorMessage = `SERVER_ERROR: Internal server error (${statusCode}). The server encountered an unexpected problem. Please try again later.`;
+                break;
+              case 502:
+              case 503:
+              case 504:
+                errorMessage = `SERVICE_UNAVAILABLE: Server temporarily unavailable (${statusCode}). Please try again in a few minutes.`;
+                break;
+              default:
+                errorMessage = `HTTP_ERROR: Server returned error ${statusCode} (${statusText}). Please try again or contact support if the problem persists.`;
+            }
+          } else {
+            errorMessage = `HTTP_ERROR: ${err.message}`;
+          }
+        } else if (err.message.includes('JSON')) {
+          errorMessage = 'PARSE_ERROR: The server returned invalid data. This may indicate a server configuration issue.';
+        } else if (err.message.includes('NetworkError') || err.message.includes('fetch')) {
+          errorMessage = 'CONNECTIVITY_ERROR: Network connection failed. Please check your internet connection and try again.';
+        } else {
+          errorMessage = `APPLICATION_ERROR: ${err.message}`;
+        }
+      } else if (typeof err === 'string') {
+        errorMessage = `STRING_ERROR: ${err}`;
+      } else {
+        errorMessage = `UNKNOWN_ERROR: An unexpected error occurred: ${JSON.stringify(err)}`;
+      }
+      
+      // Add troubleshooting tips
+      errorMessage += '\n\nTroubleshooting tips:';
+      errorMessage += '\n• Check your internet connection';
+      errorMessage += '\n• Verify all required fields are filled';
+      errorMessage += '\n• Try refreshing the page';
+      errorMessage += '\n• Contact support if the problem persists';
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -150,9 +228,14 @@ export default function NewTicket() {
         >
           <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl border border-blue-500/20">
             {error && (
-              <div className="mb-6 p-4 bg-red-900/50 border border-red-500 text-red-200 rounded-lg flex items-center space-x-3">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                <span>{error}</span>
+              <div className="mb-6 p-4 bg-red-900/50 border border-red-500 text-red-200 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <div className="font-semibold mb-2">Ticket Creation Failed</div>
+                    <div className="text-sm whitespace-pre-line">{error}</div>
+                  </div>
+                </div>
               </div>
             )}
 
