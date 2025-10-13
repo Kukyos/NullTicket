@@ -135,6 +135,8 @@ async def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
 @router.post("/", status_code=201)
 async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)):
     """Create a new ticket manually"""
+    logger.info(f"Starting ticket creation for: {ticket_data.title}")
+    
     try:
         from ..services.classification_service import classification_service
         from ..services.routing_service import routing_service
@@ -142,6 +144,7 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
         # Generate ticket number
         import uuid
         ticket_number = f"TKT-{datetime.utcnow().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8].upper()}"
+        logger.info(f"Generated ticket number: {ticket_number}")
         
         # Create ticket
         ticket = Ticket(
@@ -153,6 +156,7 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
             requester_phone=ticket_data.requester_phone,
             source=TicketSource.WEB_FORM,
         )
+        logger.info(f"Ticket object created: {ticket.ticket_number}")
     except Exception as e:
         logger.error(f"Failed to initialize ticket: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to create ticket: {str(e)}")
@@ -160,25 +164,32 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
     # Seed defaults from request payload
     initial_category = ticket_data.category
     initial_priority = ticket_data.priority
+    logger.info(f"Initial category: {initial_category}, priority: {initial_priority}")
 
     try:
         ticket.category = _to_category_enum(initial_category or TicketCategory.GENERAL.value)
-    except Exception:
+        logger.info(f"Set category to: {ticket.category}")
+    except Exception as e:
+        logger.warning(f"Failed to set category {initial_category}: {e}")
         ticket.category = TicketCategory.GENERAL
 
     try:
         ticket.priority = _to_priority_enum(initial_priority or TicketPriority.MEDIUM.value)
-    except Exception:
+        logger.info(f"Set priority to: {ticket.priority}")
+    except Exception as e:
+        logger.warning(f"Failed to set priority {initial_priority}: {e}")
         ticket.priority = TicketPriority.MEDIUM
 
     # Classify
     classification = None
     try:
+        logger.info("Starting classification...")
         classification = classification_service.classify_ticket(
             title=ticket.title,
             description=ticket.description,
             source="api"
         )
+        logger.info(f"Classification result: {classification}")
     except Exception as e:
         logger.warning(f"Classification service failed: {e}")
 
@@ -190,12 +201,14 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
         if category_value:
             try:
                 ticket.category = _to_category_enum(category_value)
+                logger.info(f"Classification overrode category to: {ticket.category}")
             except Exception:
                 logger.warning("Unexpected classification category: %s", category_value)
 
         if priority_value:
             try:
                 ticket.priority = _to_priority_enum(priority_value)
+                logger.info(f"Classification overrode priority to: {ticket.priority}")
             except Exception:
                 logger.warning("Unexpected classification priority: %s", priority_value)
 
@@ -203,18 +216,23 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
     
     # Route to team
     try:
+        logger.info("Starting routing...")
         team = routing_service.route_ticket(db, ticket, classification)
         if team:
             ticket.assigned_team_id = team.id
+            logger.info(f"Routed to team: {team.id}")
+        else:
+            logger.info("No team assigned")
     except Exception as e:
         logger.warning(f"Routing service failed: {e}")
     
     # Save
     try:
+        logger.info("Saving ticket to database...")
         db.add(ticket)
         db.commit()
         db.refresh(ticket)
-        logger.info(f"Ticket created successfully: {ticket.ticket_number}")
+        logger.info(f"Ticket saved successfully: {ticket.ticket_number}")
     except Exception as e:
         logger.error(f"Database save failed: {e}")
         db.rollback()
@@ -222,6 +240,7 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
     
     # Send notification (non-blocking)
     try:
+        logger.info("Sending notification...")
         asyncio.create_task(
             email_service.send_ticket_created(
                 ticket.ticket_number,
@@ -229,10 +248,14 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
                 ticket.title
             )
         )
+        logger.info("Notification sent")
     except Exception as e:
         logger.warning(f"Failed to send email notification: {e}")
     
-    return serialize_ticket(ticket)
+    logger.info(f"Ticket creation completed, returning: {ticket.ticket_number}")
+    result = serialize_ticket(ticket)
+    logger.info(f"Serialized result: {result}")
+    return result
 
 @router.put("/{ticket_id}/status")
 async def update_ticket_status(
