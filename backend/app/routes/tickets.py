@@ -124,12 +124,12 @@ async def list_tickets(
 
     return [serialize_ticket(ticket) for ticket in tickets]
 
-@router.get("/debug")
+@router.get("/debug-test")
 async def debug_endpoint():
     """Debug endpoint to test if routes are working"""
     return {"message": "Debug endpoint working", "timestamp": datetime.utcnow().isoformat()}
 
-@router.post("/debug")
+@router.post("/debug-test")
 async def debug_post_endpoint(data: dict):
     """Debug POST endpoint"""
     return {
