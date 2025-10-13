@@ -43,10 +43,16 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
-      return NextResponse.json(
-        { error: 'Failed to create ticket' },
-        { status: response.status }
-      );
+      // Forward the actual backend error
+      try {
+        const errorData = await response.json();
+        return NextResponse.json(errorData, { status: response.status });
+      } catch (e) {
+        return NextResponse.json(
+          { error: `Backend error: ${response.status} ${response.statusText}` },
+          { status: response.status }
+        );
+      }
     }
 
     const data = await response.json();

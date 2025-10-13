@@ -43,7 +43,12 @@ export default function NewTicket() {
       setTicketNumber(response.ticket_number);
     } catch (err) {
       console.error('Failed to create ticket:', err);
-      setError('Failed to create ticket. Please try again.');
+      // Show actual error details for debugging
+      const errorMessage = err instanceof Error ? err.message : 
+                          (err as any)?.message || 
+                          JSON.stringify(err) || 
+                          'Unknown error occurred';
+      setError(`Failed to create ticket: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
