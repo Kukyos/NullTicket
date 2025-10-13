@@ -124,6 +124,20 @@ async def list_tickets(
 
     return [serialize_ticket(ticket) for ticket in tickets]
 
+@router.get("/debug")
+async def debug_endpoint():
+    """Debug endpoint to test if routes are working"""
+    return {"message": "Debug endpoint working", "timestamp": datetime.utcnow().isoformat()}
+
+@router.post("/debug")
+async def debug_post_endpoint(data: dict):
+    """Debug POST endpoint"""
+    return {
+        "message": "Debug POST endpoint working",
+        "received_data": data,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
 @router.get("/{ticket_id}")
 async def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
     """Get ticket details by ID"""
@@ -321,17 +335,3 @@ async def delete_ticket(ticket_id: int, db: Session = Depends(get_db)):
     db.commit()
     
     return {"success": True, "message": "Ticket deleted"}
-
-@router.get("/debug")
-async def debug_endpoint():
-    """Debug endpoint to test if routes are working"""
-    return {"message": "Debug endpoint working", "timestamp": datetime.utcnow().isoformat()}
-
-@router.post("/debug")
-async def debug_post_endpoint(data: dict):
-    """Debug POST endpoint"""
-    return {
-        "message": "Debug POST endpoint working",
-        "received_data": data,
-        "timestamp": datetime.utcnow().isoformat()
-    }
