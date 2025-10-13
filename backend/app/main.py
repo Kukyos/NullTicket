@@ -92,6 +92,11 @@ async def debug_post_endpoint(data: dict):
         "timestamp": datetime.utcnow().isoformat()
     }
 
+@app.get("/test")
+async def test_endpoint():
+    """Simple test endpoint"""
+    return {"message": "Test endpoint working"}
+
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """Root endpoint with system information"""
