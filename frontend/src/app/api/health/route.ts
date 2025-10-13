@@ -26,11 +26,21 @@ export async function GET(request: NextRequest) {
 
     const backendHealth = await backendResponse.json();
 
+    // Handle both old and new backend health formats
+    const databaseStatus = backendHealth.database || backendHealth.services?.database;
+    const aiStatus = backendHealth.ai_services || backendHealth.services?.ai;
+
+    // Convert old format values to new format
+    const normalizedDatabase = databaseStatus === 'ok' ? 'healthy' : 
+                              databaseStatus === 'healthy' ? 'healthy' : 'unhealthy';
+    const normalizedAi = aiStatus === true ? 'healthy' : 
+                        aiStatus === 'healthy' ? 'healthy' : 'unhealthy';
+
     return NextResponse.json({
       status: 'healthy',
       backend: 'healthy',
-      database: backendHealth.database || 'unknown',
-      ai_services: backendHealth.ai_services || 'unknown',
+      database: normalizedDatabase,
+      ai_services: normalizedAi,
       timestamp: new Date().toISOString(),
     });
 
