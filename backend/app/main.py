@@ -78,6 +78,20 @@ app.include_router(kb.router, prefix="/api/kb", tags=["Knowledge Base"])
 from .routes import webhooks
 app.include_router(webhooks.router, prefix="/api/webhooks", tags=["Webhooks"])
 
+@app.get("/api/debug")
+async def debug_endpoint():
+    """Debug endpoint to test if routes are working"""
+    return {"message": "Debug endpoint working", "timestamp": datetime.utcnow().isoformat()}
+
+@app.post("/api/debug")
+async def debug_post_endpoint(data: dict):
+    """Debug POST endpoint"""
+    return {
+        "message": "Debug POST endpoint working",
+        "received_data": data,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """Root endpoint with system information"""
@@ -254,19 +268,37 @@ async def health_check():
         }
     }
 
-@app.get("/api/debug")
-async def debug_endpoint():
-    """Debug endpoint to test if routes are working"""
-    return {"message": "Debug endpoint working", "timestamp": datetime.utcnow().isoformat()}
+@app.get("/health/database")
+async def database_health(db = Depends(get_db)):
+    """Check database connectivity"""
+    try:
+        # Simple query to test connection
+        from sqlalchemy import text
+        db.execute(text("SELECT 1"))
+        return {"status": "connected", "timestamp": datetime.utcnow()}
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Database connection failed: {str(e)}")
 
-@app.post("/api/debug")
-async def debug_post_endpoint(data: dict):
-    """Debug POST endpoint"""
-    return {
-        "message": "Debug POST endpoint working",
-        "received_data": data,
-        "timestamp": datetime.utcnow().isoformat()
-    }
+@app.get("/health/ai")
+async def ai_health():
+    """Check AI service availability"""
+    if not settings.GROQ_API_KEY:
+        raise HTTPException(status_code=503, detail="AI service not configured")
+    
+    # Test classification service
+    from .services.classification_service import classification_service
+    try:
+        result = classification_service._fallback_classification(
+            "Test ticket",
+            "This is a test"
+        )
+        return {
+            "status": "available",
+            "model": settings.AI_MODEL,
+            "fallback_working": True
+        }
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"AI service error: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
