@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "name": "nullticket-frontend",
+  "builds": [
+    {
+      "src": "TicketNull/frontend/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}
