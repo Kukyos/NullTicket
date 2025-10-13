@@ -90,19 +90,7 @@ def _to_category_enum(value: str) -> TicketCategory:
     except KeyError:
         return TicketCategory(value.lower())
 
-@router.get("/debug")
-async def debug_endpoint():
-    """Debug endpoint to test if routes are working"""
-    return {"message": "Debug endpoint working", "timestamp": datetime.utcnow().isoformat()}
-
-@router.post("/debug")
-async def debug_post_endpoint(data: dict):
-    """Debug POST endpoint"""
-    return {
-        "message": "Debug POST endpoint working",
-        "received_data": data,
-        "timestamp": datetime.utcnow().isoformat()
-    }
+@router.get("/")
 async def list_tickets(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, le=100),
@@ -333,3 +321,17 @@ async def delete_ticket(ticket_id: int, db: Session = Depends(get_db)):
     db.commit()
     
     return {"success": True, "message": "Ticket deleted"}
+
+@router.get("/debug")
+async def debug_endpoint():
+    """Debug endpoint to test if routes are working"""
+    return {"message": "Debug endpoint working", "timestamp": datetime.utcnow().isoformat()}
+
+@router.post("/debug")
+async def debug_post_endpoint(data: dict):
+    """Debug POST endpoint"""
+    return {
+        "message": "Debug POST endpoint working",
+        "received_data": data,
+        "timestamp": datetime.utcnow().isoformat()
+    }
