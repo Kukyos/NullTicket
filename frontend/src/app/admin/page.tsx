@@ -1,17 +1,77 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Settings, Users, GitBranch, BookOpen, Bell, Database, Shield } from 'lucide-react';
+import { Settings, Users, GitBranch, BookOpen, Bell, Database, Shield, LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { fetcher } from '@/lib/utils';
+import { useAuth } from '@/lib/auth';
+import AdminLogin from '@/components/AdminLogin';
 
 export default function Admin() {
+  const { isAuthenticated, login, logout, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('teams');
+  const [patterns, setPatterns] = useState([]);
+  const [loadingPatterns, setLoadingPatterns] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'kb' && isAuthenticated) {
+      loadPatterns();
+    }
+  }, [activeTab, isAuthenticated]);
+
+  const loadPatterns = async () => {
+    try {
+      setLoadingPatterns(true);
+      const data = await fetcher('/api/kb/analytics/patterns');
+      setPatterns(data.patterns || []);
+    } catch (err) {
+      console.error('Failed to load patterns:', err);
+    } finally {
+      setLoadingPatterns(false);
+    }
+  };
+
+  const createArticleFromPattern = async (category: string, title: string) => {
+    try {
+      const pattern = patterns.find((p: any) => p.category === category);
+      if (!pattern) return;
+
+      const sampleTicketIds = [1, 2, 3];
+
+      await fetcher('/api/kb/articles/create-from-pattern', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category,
+          title,
+          ticket_ids: sampleTicketIds
+        })
+      });
+
+      loadPatterns();
+    } catch (err) {
+      console.error('Failed to create article from pattern:', err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950/20 to-gray-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <AdminLogin onLogin={login} />;
+  }
 
   const tabs = [
     { id: 'teams', label: 'Teams', icon: Users },
     { id: 'routing', label: 'Routing Rules', icon: GitBranch },
     { id: 'kb', label: 'Knowledge Base', icon: BookOpen },
+    { id: 'analytics', label: 'Analytics', icon: Database },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'integrations', label: 'Integrations', icon: Database },
     { id: 'security', label: 'Security', icon: Shield },
@@ -19,7 +79,6 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950/20 to-gray-950">
-      {/* Navigation */}
       <nav className="glass-strong border-b border-blue-500/30 sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -27,7 +86,7 @@ export default function Admin() {
               <Settings className="w-8 h-8 text-blue-400 glow" />
               <span className="text-2xl font-bold text-glow">NullTicket</span>
             </Link>
-            
+
             <div className="flex items-center space-x-6">
               <Link href="/dashboard" className="text-gray-300 hover:text-blue-400 transition-colors">
                 Dashboard
@@ -38,13 +97,19 @@ export default function Admin() {
               <Link href="/admin" className="text-blue-400 font-semibold">
                 Admin
               </Link>
+              <button
+                onClick={logout}
+                className="flex items-center space-x-2 text-gray-300 hover:text-red-400 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
             </div>
           </div>
         </div>
       </nav>
 
       <div className="container mx-auto px-6 py-8">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -55,7 +120,6 @@ export default function Admin() {
         </motion.div>
 
         <div className="grid lg:grid-cols-4 gap-6">
-          {/* Sidebar Tabs */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -79,7 +143,6 @@ export default function Admin() {
             </div>
           </motion.div>
 
-          {/* Content Area */}
           <div className="lg:col-span-3">
             {activeTab === 'teams' && (
               <motion.div
@@ -119,156 +182,109 @@ export default function Admin() {
               </motion.div>
             )}
 
-            {activeTab === 'routing' && (
+            {activeTab === 'analytics' && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass p-6 rounded-xl border border-blue-500/20"
+                className="space-y-6"
               >
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold">Routing Rules</h2>
-                  <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg glow-hover transition-all">
-                    New Rule
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  {[
-                    { condition: 'Category: Network', action: 'Assign to Network Team', priority: 1 },
-                    { condition: 'Priority: Critical', action: 'Escalate to Senior Team', priority: 1 },
-                    { condition: 'Keyword: Password', action: 'Assign to Security Team', priority: 2 },
-                  ].map((rule, i) => (
-                    <div key={i} className="glass-strong p-4 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-semibold text-blue-400 mb-1">{rule.condition}</div>
-                          <div className="text-gray-400">→ {rule.action}</div>
-                        </div>
-                        <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm">
-                          Priority {rule.priority}
-                        </span>
-                      </div>
+                <div className="glass p-6 rounded-xl border border-blue-500/20">
+                  <h2 className="text-2xl font-bold mb-6">System Analytics</h2>
+
+                  <div className="grid md:grid-cols-4 gap-4 mb-6">
+                    <div className="glass-strong p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-blue-400">1,247</div>
+                      <div className="text-sm text-gray-400">Total Tickets</div>
+                      <div className="text-xs text-green-400 mt-1">+12% this month</div>
                     </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === 'kb' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass p-6 rounded-xl border border-blue-500/20"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold">Knowledge Base</h2>
-                  <Link href="/kb/new" className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg glow-hover transition-all">
-                    New Article
-                  </Link>
-                </div>
-                <div className="text-center py-12">
-                  <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-                  <p className="text-gray-400 mb-4">Knowledge base articles will be displayed here</p>
-                  <p className="text-sm text-gray-500">AI-powered article suggestions coming soon</p>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === 'notifications' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass p-6 rounded-xl border border-blue-500/20"
-              >
-                <h2 className="text-2xl font-bold mb-6">Notification Settings</h2>
-                <div className="space-y-6">
-                  <div className="glass-strong p-4 rounded-lg">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="font-semibold mb-1">Email Notifications</h3>
-                        <p className="text-sm text-gray-400">Send email alerts for ticket updates</p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" defaultChecked />
-                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                      </label>
+                    <div className="glass-strong p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-green-400">94.2%</div>
+                      <div className="text-sm text-gray-400">Resolution Rate</div>
+                      <div className="text-xs text-green-400 mt-1">+2.1% this month</div>
+                    </div>
+                    <div className="glass-strong p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-purple-400">2.4h</div>
+                      <div className="text-sm text-gray-400">Avg Resolution Time</div>
+                      <div className="text-xs text-red-400 mt-1">-0.3h this month</div>
+                    </div>
+                    <div className="glass-strong p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-yellow-400">4.7</div>
+                      <div className="text-sm text-gray-400">Avg Satisfaction</div>
+                      <div className="text-xs text-green-400 mt-1">+0.2 this month</div>
                     </div>
                   </div>
-                  <div className="glass-strong p-4 rounded-lg">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="font-semibold mb-1">SMS Alerts</h3>
-                        <p className="text-sm text-gray-400">Send SMS for critical tickets</p>
+
+                  <div className="grid md:grid-cols-2 gap-6 mb-6">
+                    <div className="glass-strong p-6 rounded-lg">
+                      <h3 className="text-lg font-semibold mb-4">Tickets by Category</h3>
+                      <div className="space-y-3">
+                        {[
+                          { category: 'Network', count: 245, percentage: 32 },
+                          { category: 'Hardware', count: 189, percentage: 25 },
+                          { category: 'Software', count: 156, percentage: 20 },
+                          { category: 'Access', count: 98, percentage: 13 },
+                          { category: 'Other', count: 78, percentage: 10 },
+                        ].map((item) => (
+                          <div key={item.category} className="flex items-center justify-between">
+                            <span className="text-sm">{item.category}</span>
+                            <div className="flex items-center space-x-2">
+                              <div className="w-24 bg-gray-700 rounded-full h-2">
+                                <div
+                                  className="bg-blue-500 h-2 rounded-full"
+                                  style={{ width: `${item.percentage}%` }}
+                                />
+                              </div>
+                              <span className="text-sm text-gray-400 w-12">{item.count}</span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" defaultChecked />
-                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                      </label>
+                    </div>
+
+                    <div className="glass-strong p-6 rounded-lg">
+                      <h3 className="text-lg font-semibold mb-4">Team Performance</h3>
+                      <div className="space-y-3">
+                        {[
+                          { team: 'Network Team', resolved: 89, avgTime: '2.1h', satisfaction: 4.8 },
+                          { team: 'Security Team', resolved: 67, avgTime: '3.2h', satisfaction: 4.6 },
+                          { team: 'Application Team', resolved: 78, avgTime: '2.8h', satisfaction: 4.7 },
+                          { team: 'Help Desk', resolved: 156, avgTime: '1.9h', satisfaction: 4.5 },
+                        ].map((team) => (
+                          <div key={team.team} className="flex items-center justify-between p-3 glass rounded">
+                            <div>
+                              <div className="font-medium">{team.team}</div>
+                              <div className="text-sm text-gray-400">{team.resolved} resolved</div>
+                            </div>
+                            <div className="text-right text-sm">
+                              <div>{team.avgTime} avg</div>
+                              <div className="text-yellow-400">★ {team.satisfaction}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div className="glass-strong p-4 rounded-lg">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="font-semibold mb-1">SLA Breach Alerts</h3>
-                        <p className="text-sm text-gray-400">Notify when SLA is at risk</p>
+
+                  <div className="glass-strong p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-4">SLA Compliance</h3>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-green-400 mb-2">96.4%</div>
+                        <div className="text-sm text-gray-400">Overall Compliance</div>
+                        <div className="text-xs text-green-400 mt-1">Target: 95%</div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" defaultChecked />
-                        <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                      </label>
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-yellow-400 mb-2">89.2%</div>
+                        <div className="text-sm text-gray-400">Critical Tickets</div>
+                        <div className="text-xs text-yellow-400 mt-1">Target: 98%</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-blue-400 mb-2">97.8%</div>
+                        <div className="text-sm text-gray-400">Standard Tickets</div>
+                        <div className="text-xs text-green-400 mt-1">Target: 90%</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === 'integrations' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass p-6 rounded-xl border border-blue-500/20"
-              >
-                <h2 className="text-2xl font-bold mb-6">Integrations</h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {[
-                    { name: 'GLPI', status: 'connected', icon: '🔧' },
-                    { name: 'SAP Solman', status: 'connected', icon: '📊' },
-                    { name: 'Email (IMAP)', status: 'connected', icon: '📧' },
-                    { name: 'Twilio SMS', status: 'pending', icon: '📱' },
-                  ].map((integration) => (
-                    <div key={integration.name} className="glass-strong p-4 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-2xl">{integration.icon}</span>
-                          <span className="font-semibold">{integration.name}</span>
-                        </div>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          integration.status === 'connected'
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-yellow-500/20 text-yellow-400'
-                        }`}>
-                          {integration.status}
-                        </span>
-                      </div>
-                      <button className="w-full mt-2 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 rounded text-sm transition-all">
-                        Configure
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === 'security' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass p-6 rounded-xl border border-blue-500/20"
-              >
-                <h2 className="text-2xl font-bold mb-6">Security Settings</h2>
-                <div className="text-center py-12">
-                  <Shield className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-                  <p className="text-gray-400 mb-4">Security configuration options</p>
-                  <p className="text-sm text-gray-500">Role-based access control, API keys, audit logs</p>
                 </div>
               </motion.div>
             )}

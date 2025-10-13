@@ -48,6 +48,11 @@ async def startup_event():
     logger.info(f"✉️ Email ingestion: {'Enabled' if settings.EMAIL_ENABLED else 'Disabled'}")
     logger.info(f"🔌 GLPI integration: {'Enabled' if settings.GLPI_ENABLED else 'Disabled'}")
     logger.info(f"🔌 Solman integration: {'Enabled' if settings.SOLMAN_ENABLED else 'Disabled'}")
+    
+    # Start notification service
+    from .services.notification_service import notification_service
+    await notification_service.start_background_tasks()
+    logger.info("🔔 Notification service started")
 
 # Include routers
 app.include_router(tickets.router, prefix="/api/tickets", tags=["Tickets"])

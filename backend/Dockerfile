@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -20,12 +20,15 @@ COPY . .
 # Create data directory
 RUN mkdir -p data
 
+# Create startup script
+RUN echo '#!/bin/bash\nPORT=${PORT:-8000}\nuvicorn app.main:app --host 0.0.0.0 --port $PORT' > /app/start.sh && chmod +x /app/start.sh
+
 # Expose port
 EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health')"
+    CMD python -c "import requests; requests.get('http://localhost:${PORT:-8000}/health')"
 
 # Run application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/start.sh"]

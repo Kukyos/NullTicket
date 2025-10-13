@@ -6,8 +6,11 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime
 import logging
+import asyncio
 
 from ..database import get_db
+from ..services.email_service import email_service
+from ..services.sms_service import sms_service
 from ..models.ticket_models import (
     Ticket,
     TicketStatus,
@@ -132,23 +135,27 @@ async def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
 @router.post("/", status_code=201)
 async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)):
     """Create a new ticket manually"""
-    from ..services.classification_service import classification_service
-    from ..services.routing_service import routing_service
-    
-    # Generate ticket number
-    import uuid
-    ticket_number = f"TKT-{datetime.utcnow().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8].upper()}"
-    
-    # Create ticket
-    ticket = Ticket(
-        ticket_number=ticket_number,
-        title=ticket_data.title,
-        description=ticket_data.description,
-        requester_email=ticket_data.requester_email,
-        requester_name=ticket_data.requester_name,
-        requester_phone=ticket_data.requester_phone,
-        source=TicketSource.WEB_FORM,
-    )
+    try:
+        from ..services.classification_service import classification_service
+        from ..services.routing_service import routing_service
+        
+        # Generate ticket number
+        import uuid
+        ticket_number = f"TKT-{datetime.utcnow().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8].upper()}"
+        
+        # Create ticket
+        ticket = Ticket(
+            ticket_number=ticket_number,
+            title=ticket_data.title,
+            description=ticket_data.description,
+            requester_email=ticket_data.requester_email,
+            requester_name=ticket_data.requester_name,
+            requester_phone=ticket_data.requester_phone,
+            source=TicketSource.WEB_FORM,
+        )
+    except Exception as e:
+        logger.error(f"Failed to initialize ticket: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create ticket: {str(e)}")
 
     # Seed defaults from request payload
     initial_category = ticket_data.category
@@ -165,11 +172,15 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
         ticket.priority = TicketPriority.MEDIUM
 
     # Classify
-    classification = classification_service.classify_ticket(
-        title=ticket.title,
-        description=ticket.description,
-        source="api"
-    )
+    classification = None
+    try:
+        classification = classification_service.classify_ticket(
+            title=ticket.title,
+            description=ticket.description,
+            source="api"
+        )
+    except Exception as e:
+        logger.warning(f"Classification service failed: {e}")
 
     # Apply classification overrides
     if classification:
@@ -191,14 +202,35 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
         ticket.ai_classification_confidence = classification.get("confidence", 0.0)
     
     # Route to team
-    team = routing_service.route_ticket(db, ticket, classification)
-    if team:
-        ticket.assigned_team_id = team.id
+    try:
+        team = routing_service.route_ticket(db, ticket, classification)
+        if team:
+            ticket.assigned_team_id = team.id
+    except Exception as e:
+        logger.warning(f"Routing service failed: {e}")
     
     # Save
-    db.add(ticket)
-    db.commit()
-    db.refresh(ticket)
+    try:
+        db.add(ticket)
+        db.commit()
+        db.refresh(ticket)
+        logger.info(f"Ticket created successfully: {ticket.ticket_number}")
+    except Exception as e:
+        logger.error(f"Database save failed: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to save ticket: {str(e)}")
+    
+    # Send notification (non-blocking)
+    try:
+        asyncio.create_task(
+            email_service.send_ticket_created(
+                ticket.ticket_number,
+                ticket.requester_email,
+                ticket.title
+            )
+        )
+    except Exception as e:
+        logger.warning(f"Failed to send email notification: {e}")
     
     return serialize_ticket(ticket)
 
@@ -226,6 +258,15 @@ async def update_ticket_status(
         ticket.resolved_at = datetime.utcnow()
     
     db.commit()
+    
+    # Send notification for status update
+    asyncio.create_task(
+        email_service.send_ticket_updated(
+            ticket.ticket_number,
+            ticket.requester_email,
+            ticket.status.value
+        )
+    )
     
     return {
         "success": True,
