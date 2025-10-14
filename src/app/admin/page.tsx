@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Settings, Users, GitBranch, BookOpen, Bell, Database, Shield, LogOut } from 'lucide-react';
+import { Settings, Users, GitBranch, BookOpen, Bell, Database, Shield, LogOut, Ticket, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { fetcher } from '@/lib/utils';
@@ -10,13 +10,18 @@ import AdminLogin from '@/components/AdminLogin';
 
 export default function Admin() {
   const { isAuthenticated, login, logout, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState('teams');
+  const [activeTab, setActiveTab] = useState('tickets');
   const [patterns, setPatterns] = useState([]);
   const [loadingPatterns, setLoadingPatterns] = useState(false);
+  const [tickets, setTickets] = useState([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'kb' && isAuthenticated) {
       loadPatterns();
+    }
+    if (activeTab === 'tickets' && isAuthenticated) {
+      loadTickets();
     }
   }, [activeTab, isAuthenticated]);
 
@@ -29,6 +34,44 @@ export default function Admin() {
       console.error('Failed to load patterns:', err);
     } finally {
       setLoadingPatterns(false);
+    }
+  };
+
+  const loadTickets = async () => {
+    try {
+      setLoadingTickets(true);
+      const data = await fetcher('/api/tickets');
+      setTickets(data || []);
+    } catch (err) {
+      console.error('Failed to load tickets:', err);
+    } finally {
+      setLoadingTickets(false);
+    }
+  };
+
+  const updateTicketStatus = async (ticketId: number, status: string) => {
+    try {
+      await fetcher(`/api/tickets/${ticketId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      loadTickets(); // Refresh the tickets list
+    } catch (err) {
+      console.error('Failed to update ticket status:', err);
+    }
+  };
+
+  const resolveTicket = async (ticketId: number) => {
+    try {
+      await fetcher(`/api/tickets/${ticketId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'resolved' })
+      });
+      loadTickets(); // Refresh the tickets list
+    } catch (err) {
+      console.error('Failed to resolve ticket:', err);
     }
   };
 
@@ -68,6 +111,7 @@ export default function Admin() {
   }
 
   const tabs = [
+    { id: 'tickets', label: 'Tickets', icon: Ticket },
     { id: 'teams', label: 'Teams', icon: Users },
     { id: 'routing', label: 'Routing Rules', icon: GitBranch },
     { id: 'kb', label: 'Knowledge Base', icon: BookOpen },
@@ -144,6 +188,122 @@ export default function Admin() {
           </motion.div>
 
           <div className="lg:col-span-3">
+            {activeTab === 'tickets' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                <div className="glass p-6 rounded-xl border border-blue-500/20">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold">Ticket Management</h2>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <span className="text-sm text-gray-400">High Priority</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <span className="text-sm text-gray-400">Medium Priority</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-400">Low Priority</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {loadingTickets ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {tickets.length === 0 ? (
+                        <div className="text-center py-12">
+                          <Ticket className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-400 mb-2">No tickets found</h3>
+                          <p className="text-gray-500">All tickets have been resolved!</p>
+                        </div>
+                      ) : (
+                        tickets.map((ticket: any) => (
+                          <motion.div
+                            key={ticket.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="glass-strong p-6 rounded-lg hover:bg-blue-900/10 transition-all"
+                          >
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-start space-x-4">
+                                <div className={`w-4 h-4 rounded-full mt-1 ${
+                                  ticket.priority === 'high' ? 'bg-red-500' :
+                                  ticket.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                                }`}></div>
+                                <div>
+                                  <h3 className="text-lg font-semibold mb-1">{ticket.title}</h3>
+                                  <p className="text-gray-400 text-sm mb-2">Ticket #{ticket.ticket_number}</p>
+                                  <p className="text-gray-300 mb-3">{ticket.description}</p>
+                                  <div className="flex items-center space-x-4 text-sm text-gray-400">
+                                    <span>By: {ticket.requester_name}</span>
+                                    <span>Category: {ticket.category}</span>
+                                    <span>Status: <span className={`px-2 py-1 rounded text-xs ${
+                                      ticket.status === 'new' ? 'bg-blue-500/20 text-blue-400' :
+                                      ticket.status === 'in_progress' ? 'bg-yellow-500/20 text-yellow-400' :
+                                      ticket.status === 'resolved' ? 'bg-green-500/20 text-green-400' :
+                                      'bg-red-500/20 text-red-400'
+                                    }`}>{ticket.status.replace('_', ' ')}</span></span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <select
+                                  value={ticket.status}
+                                  onChange={(e) => updateTicketStatus(ticket.id, e.target.value)}
+                                  className="px-3 py-1 bg-gray-800 border border-gray-700 rounded text-sm focus:border-blue-500 focus:outline-none"
+                                >
+                                  <option value="new">New</option>
+                                  <option value="in_progress">In Progress</option>
+                                  <option value="resolved">Resolved</option>
+                                  <option value="closed">Closed</option>
+                                </select>
+                                <button
+                                  onClick={() => resolveTicket(ticket.id)}
+                                  className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-colors flex items-center space-x-2"
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                  <span>Resolve</span>
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-4 border-t border-gray-700">
+                              <div className="flex items-center space-x-4 text-sm text-gray-400">
+                                <span className="flex items-center space-x-1">
+                                  <Clock className="w-4 h-4" />
+                                  <span>{new Date(ticket.created_at).toLocaleDateString()}</span>
+                                </span>
+                                {ticket.assigned_team_id && (
+                                  <span>Assigned to: Network Team</span>
+                                )}
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <button className="px-3 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 rounded text-sm transition-colors">
+                                  Assign Team
+                                </button>
+                                <button className="px-3 py-1 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 rounded text-sm transition-colors">
+                                  Add Note
+                                </button>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
             {activeTab === 'teams' && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
