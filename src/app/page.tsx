@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Zap, Brain, GitBranch, Mail, MessageSquare, BarChart3, CheckCircle, XCircle, AlertCircle, Wifi, WifiOff } from 'lucide-react';
+import { Shield, Zap, Brain, GitBranch, Mail, MessageSquare, BarChart3, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
@@ -93,7 +93,7 @@ export default function Home() {
               <span className="block text-glow-white text-glow-white">Smart Helpdesk</span>
             </h1>
             <p className="text-lg md:text-xl text-midnight-300 mb-8">
-              AI-powered unified ticketing system for India's largest power transmission company. Consolidate all IT support channels into one intelligent platform with automated classification, routing, and resolution for seamless power grid operations.
+              AI-powered unified ticketing system for India&apos;s largest power transmission company. Consolidate all IT support channels into one intelligent platform with automated classification, routing, and resolution for seamless power grid operations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
@@ -481,7 +481,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-midnight-300 text-sm">
-                India's largest power transmission company, powering the nation's energy needs with cutting-edge technology and AI-driven support systems.
+                India&apos;s largest power transmission company, powering the nation&apos;s energy needs with cutting-edge technology and AI-driven support systems.
               </p>
             </div>
             

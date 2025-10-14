@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { BarChart3, Clock, CheckCircle, AlertTriangle, Users, TrendingUp, Activity } from 'lucide-react';
+import { BarChart3, Clock, CheckCircle, Users, TrendingUp, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { fetcher } from '@/lib/utils';

@@ -33,7 +33,7 @@ export async function fetcher(url: string, options?: RequestInit) {
       } else {
         errorMessage += ` - ${JSON.stringify(errorData)}`;
       }
-    } catch (e) {
+    } catch {
       // If we can't parse JSON, just use the status
       errorMessage += ` (failed to parse error response)`;
     }

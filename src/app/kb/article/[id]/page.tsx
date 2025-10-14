@@ -28,23 +28,23 @@ export default function ArticlePage() {
   const [userRating, setUserRating] = useState<'helpful' | 'not_helpful' | null>(null);
 
   useEffect(() => {
+    const loadArticle = async () => {
+      try {
+        setLoading(true);
+        const data = await fetcher(`/api/kb/${articleId}`);
+        setArticle(data);
+      } catch (err) {
+        console.error('Failed to load article:', err);
+        setError('Failed to load article. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (articleId) {
       loadArticle();
     }
   }, [articleId]);
-
-  const loadArticle = async () => {
-    try {
-      setLoading(true);
-      const data = await fetcher(`/api/kb/${articleId}`);
-      setArticle(data);
-    } catch (err) {
-      console.error('Failed to load article:', err);
-      setError('Failed to load article. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const submitRating = async (rating: 'helpful' | 'not_helpful') => {
     if (!article) return;

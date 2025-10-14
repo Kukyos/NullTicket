@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X, Send } from 'lucide-react';
-import { fetcher } from '@/lib/utils';
 
 interface Message {
   role: 'user' | 'assistant';

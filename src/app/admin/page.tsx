@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Settings, Users, GitBranch, BookOpen, Bell, Database, Shield, LogOut, Ticket, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Users, GitBranch, BookOpen, Bell, Database, Shield, LogOut, Ticket, CheckCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { fetcher } from '@/lib/utils';
