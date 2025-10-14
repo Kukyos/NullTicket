@@ -116,8 +116,8 @@ export default function Tickets() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-3">
-              <MessageSquare className="w-8 h-8 text-glow-white" />
-              <span className="text-2xl font-bold text-white">NullTicket</span>
+              <AlertCircle className="w-8 h-8 text-glow-white" />
+              <span className="text-2xl font-bold text-white">POWERGRID Helpdesk</span>
             </Link>
             
             <div className="flex items-center space-x-6">

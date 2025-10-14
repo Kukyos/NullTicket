@@ -26,12 +26,9 @@ async def get_analytics_summary(db: Session = Depends(get_db)):
             Ticket.status.not_in(['resolved', 'closed'])
         ).count()
 
-        # Resolved tickets today
-        from datetime import datetime
-        today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        # Resolved tickets (all time, not just today)
         resolved_tickets = db.query(Ticket).filter(
-            Ticket.status.in_(['resolved', 'closed']),
-            Ticket.created_at >= today
+            Ticket.status.in_(['resolved', 'closed'])
         ).count()
 
         return {
@@ -143,19 +140,19 @@ async def get_ticket_trend(
     """
     Get daily ticket creation trend
     """
-    from datetime import date
+    from datetime import date, datetime, timedelta
     
     today = datetime.utcnow().date()
     start_date = today - timedelta(days=days)
     
-    # Get tickets grouped by date
+    # Get tickets grouped by date (compatible with SQLite)
     tickets_by_date = db.query(
-        func.date(Ticket.created_at).label('date'),
+        func.strftime('%Y-%m-%d', Ticket.created_at).label('date'),
         func.count(Ticket.id).label('count')
     ).filter(
         Ticket.created_at >= start_date
     ).group_by(
-        func.date(Ticket.created_at)
+        func.strftime('%Y-%m-%d', Ticket.created_at)
     ).all()
     
     # Fill in missing dates with 0
@@ -165,8 +162,8 @@ async def get_ticket_trend(
         result[str(current_date)] = 0
         current_date += timedelta(days=1)
     
-    for date_obj, count in tickets_by_date:
-        result[str(date_obj)] = count
+    for date_str, count in tickets_by_date:
+        result[date_str] = count
     
     return {
         "period": f"Last {days} days",

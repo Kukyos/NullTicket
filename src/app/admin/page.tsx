@@ -127,8 +127,8 @@ export default function Admin() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-3">
-              <Settings className="w-8 h-8 text-glow-white" />
-              <span className="text-2xl font-bold text-white">NullTicket</span>
+              <Shield className="w-8 h-8 text-glow-white" />
+              <span className="text-2xl font-bold text-white">POWERGRID Helpdesk</span>
             </Link>
 
             <div className="flex items-center space-x-6">
@@ -319,9 +319,9 @@ export default function Admin() {
                   </div>
                   <div className="space-y-4">
                     {[
-                      { name: 'Network Team', members: 12, skills: ['VPN', 'Firewall', 'Routing'] },
-                      { name: 'Security Team', members: 8, skills: ['Access Control', 'IAM', 'Compliance'] },
-                      { name: 'Application Team', members: 15, skills: ['SAP', 'Oracle', 'Custom Apps'] },
+                      { name: 'Control Center Team', members: 12, skills: ['SCADA', 'Grid Monitoring', 'Emergency Response'] },
+                      { name: 'Network Operations', members: 8, skills: ['Transmission Lines', 'Substation Equipment', 'Load Balancing'] },
+                      { name: 'IT Support Team', members: 15, skills: ['SAP ERP', 'VPN Access', 'Email Systems'] },
                     ].map((team) => (
                       <div key={team.name} className="glass-strong p-4 rounded-lg hover:bg-midnight-800/50 transition-all border border-glow-white/50">
                         <div className="flex items-center justify-between mb-2">
@@ -379,10 +379,10 @@ export default function Admin() {
                       <h3 className="text-lg font-semibold mb-4 text-white">Tickets by Category</h3>
                       <div className="space-y-3">
                         {[
-                          { category: 'Network', count: 245, percentage: 32 },
-                          { category: 'Hardware', count: 189, percentage: 25 },
-                          { category: 'Software', count: 156, percentage: 20 },
-                          { category: 'Access', count: 98, percentage: 13 },
+                          { category: 'SCADA System', count: 245, percentage: 32 },
+                          { category: 'Transmission Network', count: 189, percentage: 25 },
+                          { category: 'SAP ERP', count: 156, percentage: 20 },
+                          { category: 'Network Connectivity', count: 98, percentage: 13 },
                           { category: 'Other', count: 78, percentage: 10 },
                         ].map((item) => (
                           <div key={item.category} className="flex items-center justify-between">
@@ -405,10 +405,10 @@ export default function Admin() {
                       <h3 className="text-lg font-semibold mb-4 text-white">Team Performance</h3>
                       <div className="space-y-3">
                         {[
-                          { team: 'Network Team', resolved: 89, avgTime: '2.1h', satisfaction: 4.8 },
-                          { team: 'Security Team', resolved: 67, avgTime: '3.2h', satisfaction: 4.6 },
-                          { team: 'Application Team', resolved: 78, avgTime: '2.8h', satisfaction: 4.7 },
-                          { team: 'Help Desk', resolved: 156, avgTime: '1.9h', satisfaction: 4.5 },
+                          { team: 'Control Center Team', resolved: 89, avgTime: '2.1h', satisfaction: 4.8 },
+                          { team: 'Network Operations', resolved: 67, avgTime: '3.2h', satisfaction: 4.6 },
+                          { team: 'IT Support Team', resolved: 78, avgTime: '2.8h', satisfaction: 4.7 },
+                          { team: 'Field Support', resolved: 156, avgTime: '1.9h', satisfaction: 4.5 },
                         ].map((team) => (
                           <div key={team.team} className="flex items-center justify-between p-3 glass rounded border border-glow-white/30">
                             <div>

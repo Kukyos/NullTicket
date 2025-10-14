@@ -309,41 +309,157 @@ Would you like me to help you submit a software installation request?`;
         return response;
       }
 
-      // Hardware issues
-      if (message.includes('computer') || message.includes('laptop') || message.includes('monitor') || message.includes('keyboard') || message.includes('mouse')) {
-        let response = `🖥️ **Hardware Support:**
+      // SCADA system issues
+      if (message.includes('scada') || message.includes('supervisory') || message.includes('control system')) {
+        let response = `🏭 **SCADA System Support:**
 
-**Common Issues & Solutions:**
+**Common SCADA Issues & Solutions:**
 
-**Laptop/Computer Problems:**
-- **Slow Performance**: Close unnecessary programs, run disk cleanup
-- **Blue Screen**: Note error code, restart in safe mode
-- **Won't Start**: Check power supply, try different outlet
+**Connectivity Problems:**
+- Check network connectivity to control center
+- Verify VPN connection if accessing remotely
+- Restart SCADA client application
+- Clear application cache
 
-**Peripherals:**
-- **Mouse/Keyboard**: Try different USB port, test on another computer
-- **Monitor**: Check cable connections, adjust resolution
-- **Printer**: Check toner/ink, clear paper jams
+**Display Issues:**
+- Refresh data points (F5 or refresh button)
+- Check alarm filters and thresholds
+- Verify user permissions for specific screens
+- Update SCADA client to latest version
 
-**Hardware Request:**
-- **New Equipment**: Submit through IT procurement process
-- **Repairs**: Report fault with detailed description
-- **Upgrades**: Request through manager approval
+**Data Issues:**
+- Check data timestamp freshness
+- Verify communication with RTUs/PLCs
+- Review alarm history and logs
+- Contact control room for system status
 
-**Emergency Hardware:**
-- Critical failure affecting work: Call IT emergency line
-- Data loss: Stop using device immediately
+**Emergency Procedures:**
+- For critical SCADA failures: Call Control Center immediately
+- Document all actions taken
+- Preserve system logs for analysis
 
-Need immediate hardware assistance? I can create an urgent support ticket.`;
+**Access Requirements:**
+- SCADA access requires specific training and authorization
+- New user requests must go through security clearance
+
+Need urgent SCADA assistance? I can create a high-priority support ticket.`;
 
         // Add relevant KB articles
         if (kbResults && kbResults.length > 0) {
-          const hardwareArticles = kbResults.filter((article: any) =>
-            article.category === 'hardware' || article.tags?.includes('hardware')
+          const scadaArticles = kbResults.filter((article: any) =>
+            article.category === 'scada_system' || article.tags?.includes('scada')
           );
-          if (hardwareArticles.length > 0) {
+          if (scadaArticles.length > 0) {
             response += '\n\n📚 **Related Knowledge Base Articles:**\n';
-            hardwareArticles.slice(0, 2).forEach((article: any) => {
+            scadaArticles.slice(0, 2).forEach((article: any) => {
+              response += `• [${article.title}](/kb/article/${article.id})\n`;
+            });
+          }
+        }
+
+        return response;
+      }
+
+      // Transmission network issues
+      if (message.includes('transmission') || message.includes('grid') || message.includes('line') || message.includes('fault')) {
+        let response = `⚡ **Transmission Network Support:**
+
+**Grid Monitoring & Alerts:**
+- Check SCADA system for real-time grid status
+- Review transmission line loading and voltage levels
+- Monitor weather conditions affecting transmission
+- Check for scheduled maintenance activities
+
+**Fault Analysis:**
+- Document fault location and time
+- Note any alarms or indicators
+- Check protection relay operations
+- Review fault records and oscillography
+
+**Line Issues:**
+- Overhead line conductor problems
+- Insulator flashover or damage
+- Tower structural issues
+- Right-of-way vegetation encroachment
+
+**Substation Equipment:**
+- Transformer temperature/faults
+- Circuit breaker operations
+- Switchgear malfunctions
+- Protection system failures
+
+**Reporting Requirements:**
+- Critical faults: Report immediately to Control Center
+- Non-critical: Document and create maintenance ticket
+- Include exact location coordinates when possible
+
+For transmission network issues, please provide specific details about the affected line/equipment.`;
+
+        // Add relevant KB articles
+        if (kbResults && kbResults.length > 0) {
+          const transmissionArticles = kbResults.filter((article: any) =>
+            article.category === 'transmission_network' || article.tags?.includes('transmission')
+          );
+          if (transmissionArticles.length > 0) {
+            response += '\n\n📚 **Related Knowledge Base Articles:**\n';
+            transmissionArticles.slice(0, 2).forEach((article: any) => {
+              response += `• [${article.title}](/kb/article/${article.id})\n`;
+            });
+          }
+        }
+
+        return response;
+      }
+
+      // SAP ERP issues
+      if (message.includes('sap') || message.includes('erp') || message.includes('transaction')) {
+        let response = `📊 **SAP ERP Support:**
+
+**Common SAP Issues:**
+
+**Login Problems:**
+- Verify username and password
+- Check account lock status
+- Confirm system access authorizations
+- Try different browser or clear cache
+
+**Transaction Errors:**
+- Note exact error message and transaction code
+- Check if transaction is locked for maintenance
+- Verify user roles and authorizations
+- Review SAP system status
+
+**Performance Issues:**
+- Check system load and response times
+- Try during off-peak hours
+- Clear local SAP GUI cache
+- Restart SAP GUI application
+
+**Data Issues:**
+- Verify data entry format and requirements
+- Check mandatory field completion
+- Review validation rules
+- Confirm data consistency
+
+**System Access:**
+- SAP Production: https://sap-prod.powergrid.in
+- SAP Development: https://sap-dev.powergrid.in
+- SAP Training: https://sap-training.powergrid.in
+
+**Emergency Contacts:**
+- SAP Basis issues: Contact SAP support team
+- Data corruption: Stop all activities and report immediately
+
+Need SAP assistance? Please specify the module (FI, CO, MM, SD, etc.) and transaction code.`;
+
+        // Add relevant KB articles
+        if (kbResults && kbResults.length > 0) {
+          const sapArticles = kbResults.filter((article: any) =>
+            article.category === 'sap_erp' || article.tags?.includes('sap')
+          );
+          if (sapArticles.length > 0) {
+            response += '\n\n📚 **Related Knowledge Base Articles:**\n';
+            sapArticles.slice(0, 2).forEach((article: any) => {
               response += `• [${article.title}](/kb/article/${article.id})\n`;
             });
           }
@@ -618,7 +734,7 @@ Need immediate hardware assistance? I can create an urgent support ticket.`;
                   <MessageSquare className="w-5 h-5 text-glow-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white">NullTicket Support</h3>
+                  <h3 className="font-bold text-white">POWERGRID Helpdesk</h3>
                   <p className="text-xs text-midnight-300">AI-Powered Assistant</p>
                 </div>
               </div>

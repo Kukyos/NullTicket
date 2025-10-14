@@ -307,7 +307,7 @@ export default function NewTicket() {
                   value={formData.requester_email}
                   onChange={handleChange}
                   required
-                  placeholder="your.email@powergrid.in"
+                  placeholder="your.name@powergrid.in"
                   className="input-glow w-full"
                 />
               </div>
@@ -339,17 +339,18 @@ export default function NewTicket() {
                   className="input-glow w-full appearance-none cursor-pointer"
                 >
                   <option value="general">General</option>
-                  <option value="network">Network</option>
-                  <option value="hardware">Hardware</option>
-                  <option value="software">Software</option>
+                  <option value="scada_system">SCADA System</option>
+                  <option value="transmission_network">Transmission Network</option>
+                  <option value="substation_equipment">Substation Equipment</option>
+                  <option value="network_connectivity">Network Connectivity</option>
+                  <option value="sap_erp">SAP ERP</option>
                   <option value="password_reset">Password Reset</option>
-                  <option value="access_request">Access Request</option>
-                  <option value="sap_error">SAP Error</option>
-                  <option value="printer">Printer</option>
-                  <option value="email">Email</option>
-                  <option value="vpn">VPN</option>
-                  <option value="hr_query">HR Query</option>
-                  <option value="finance">Finance</option>
+                  <option value="vpn_access">VPN Access</option>
+                  <option value="email_outlook">Email/Outlook</option>
+                  <option value="hardware_failure">Hardware Failure</option>
+                  <option value="software_application">Software Application</option>
+                  <option value="security_incident">Security Incident</option>
+                  <option value="power_outage">Power Outage</option>
                   <option value="other">Other</option>
                 </select>
               </div>
@@ -385,7 +386,7 @@ export default function NewTicket() {
                 onChange={handleChange}
                 required
                 rows={6}
-                placeholder="Please provide detailed information about your issue, including any error messages, steps to reproduce, and what you've already tried..."
+                  placeholder="Please provide detailed information about your issue, including any error messages, affected systems (SCADA, SAP, network equipment), location details, and steps you've already taken to resolve the issue..."
                 className="input-glow w-full resize-vertical"
               />
             </div>
