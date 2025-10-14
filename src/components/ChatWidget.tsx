@@ -83,14 +83,15 @@ export default function ChatWidget() {
         }
       } catch (aiError) {
         console.error('AI chat failed:', aiError);
-        // Fall back to normal response
+        // Show actual error message
+        const errorMessage = aiError instanceof Error ? aiError.message : String(aiError);
+        setMessages(prev => [
+          ...prev,
+          { role: 'assistant', content: `Error: ${errorMessage}` }
+        ]);
+        setLoading(false);
+        return;
       }
-
-      // If AI chat fails, provide a generic response
-      setMessages(prev => [
-        ...prev,
-        { role: 'assistant', content: 'I apologize, but I\'m having trouble connecting to my AI service right now. How else can I help you?' }
-      ]);
     } finally {
       setLoading(false);
     }
@@ -571,9 +572,10 @@ Need immediate hardware assistance? I can create an urgent support ticket.`;
       ]);
     } catch (error) {
       console.error('Ticket creation error:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       setMessages(prev => [
         ...prev,
-        { role: 'assistant', content: 'Sorry, I couldn\'t create the ticket right now. Please try again or contact support directly.' }
+        { role: 'assistant', content: `Ticket creation failed: ${errorMessage}` }
       ]);
     } finally {
       setLoading(false);

@@ -11,6 +11,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if GROQ_API_KEY is set
+    if (!process.env.GROQ_API_KEY) {
+      console.error('GROQ_API_KEY environment variable is not set');
+      return NextResponse.json(
+        { error: 'GROQ_API_KEY environment variable is not configured' },
+        { status: 500 }
+      );
+    }
+
     // System prompt for the chatbot
     const systemPrompt = `You are a helpful customer support chatbot for NullTicket, a ticketing system for POWERGRID employees.
 
@@ -61,9 +70,10 @@ Otherwise, just provide a normal helpful response.`;
 
     if (!groqResponse.ok) {
       console.error('Groq API error:', groqResponse.status, groqResponse.statusText);
+      const errorText = await groqResponse.text();
       return NextResponse.json(
-        { error: 'AI service temporarily unavailable' },
-        { status: 503 }
+        { error: `Groq API error: ${groqResponse.status} ${groqResponse.statusText} - ${errorText}` },
+        { status: groqResponse.status }
       );
     }
 
@@ -98,8 +108,9 @@ Otherwise, just provide a normal helpful response.`;
 
   } catch (error) {
     console.error('Chat API error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: `Chat API error: ${errorMessage}` },
       { status: 500 }
     );
   }

@@ -13,8 +13,9 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
       return NextResponse.json(
-        { error: 'Failed to fetch tickets' },
+        { error: `Failed to fetch tickets: ${response.status} ${response.statusText} - ${errorText}` },
         {
           status: response.status,
           headers: {
@@ -36,8 +37,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Tickets API error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: `Tickets API error: ${errorMessage}` },
       {
         status: 500,
         headers: {
@@ -154,8 +156,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : String(error),
+        error: `Ticket creation error: ${error instanceof Error ? error.message : String(error)}`,
         timestamp: new Date().toISOString()
       },
       {
