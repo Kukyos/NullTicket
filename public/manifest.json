@@ -1,7 +1,7 @@
 {
-  "name": "NullTicket - IT Support System",
-  "short_name": "NullTicket",
-  "description": "AI-powered intelligent ticketing system for IT support",
+  "name": "POWERGRID Helpdesk",
+  "short_name": "POWERGRID",
+  "description": "AI-powered intelligent helpdesk system for POWERGRID Corporation",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f0f23",

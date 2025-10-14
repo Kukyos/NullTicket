@@ -7,8 +7,7 @@
 # - JWT_SECRET: Secret key for JWT tokens
 # - SMTP_HOST: SMTP server host
 # - SMTP_PORT: SMTP server port
-# - SMTP_USER: SMTP username
-# - SMTP_PASSWORD: SMTP password
+# - SMTP_PASSWORD: axumfbsmcljzncxh
 # - TWILIO_ACCOUNT_SID: Twilio account SID (optional)
 # - TWILIO_AUTH_TOKEN: Twilio auth token (optional)
 # - TWILIO_PHONE_NUMBER: Twilio phone number (optional)
@@ -27,3 +26,4 @@ restartPolicyMaxRetries = 3
 [env]
 PYTHONUNBUFFERED = "1"
 LOG_LEVEL = "INFO"
+SMTP_USER = "nullpowergrid@gmail.com"

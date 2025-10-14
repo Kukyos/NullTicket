@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class EmailService:
     def __init__(self):
         self.smtp_host = os.getenv('SMTP_HOST', 'smtp.gmail.com')
-        self.smtp_port = int(os.getenv('SMTP_PORT', '587'))
+        self.smtp_port = int(os.getenv('SMTP_PORT', '465'))  # Changed to 465 for SSL
         self.smtp_user = os.getenv('SMTP_USER', '')
         self.smtp_password = os.getenv('SMTP_PASSWORD', '')
         self.from_email = os.getenv('FROM_EMAIL', self.smtp_user)
@@ -48,7 +48,7 @@ class EmailService:
                 port=self.smtp_port,
                 username=self.smtp_user,
                 password=self.smtp_password,
-                start_tls=True,
+                use_tls=True,  # Changed from start_tls to use_tls for SSL
             )
             logger.info(f"Email sent successfully to {to_addresses}")
             return True

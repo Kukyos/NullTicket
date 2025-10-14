@@ -6,6 +6,8 @@ Run this to verify email notifications work
 import asyncio
 import os
 from dotenv import load_dotenv
+import aiosmtplib
+from email.mime.text import MIMEText
 
 # Load environment variables
 load_dotenv()
@@ -27,6 +29,36 @@ async def test_email_service():
     if not email_service.enabled:
         print("❌ Email service is not enabled!")
         print("Please set SMTP_USER and SMTP_PASSWORD environment variables")
+        return
+
+    # Test basic SMTP connection first
+    print("🔌 Testing SMTP connection...")
+    try:
+        # Create a simple test message
+        test_message = MIMEText("Test connection")
+        test_message['From'] = email_service.smtp_user
+        test_message['To'] = email_service.smtp_user
+        test_message['Subject'] = "SMTP Test"
+
+        # Try to send a test message to self
+        await aiosmtplib.send(
+            test_message,
+            hostname=email_service.smtp_host,
+            port=email_service.smtp_port,
+            username=email_service.smtp_user,
+            password=email_service.smtp_password,
+            use_tls=True,
+        )
+        print("✅ SMTP connection and authentication successful!")
+    except Exception as e:
+        print(f"❌ SMTP connection failed: {e}")
+        print("\n🔧 Troubleshooting steps:")
+        print("1. Verify your Gmail App Password is correct")
+        print("2. Enable 2-Factor Authentication on your Gmail account")
+        print("3. Generate a new App Password from Google Account settings")
+        print("4. Make sure the App Password has no spaces")
+        print("5. Check if Gmail has security restrictions on your account")
+        print("6. Try regenerating the App Password")
         return
 
     # Test email
@@ -56,6 +88,9 @@ async def test_email_service():
     except Exception as e:
         print(f"❌ Error sending email: {e}")
         print("Make sure your Gmail app password is correct")
+        import traceback
+        print("\nFull traceback:")
+        traceback.print_exc()
 
 if __name__ == "__main__":
     asyncio.run(test_email_service())

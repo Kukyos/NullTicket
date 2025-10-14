@@ -12,7 +12,7 @@ class Settings:
     """Application settings"""
     
     # Application
-    APP_NAME: str = "NullTicket - Unified Ticketing System"
+    APP_NAME: str = "POWERGRID Helpdesk"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
     
