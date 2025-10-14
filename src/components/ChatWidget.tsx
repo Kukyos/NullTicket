@@ -80,6 +80,10 @@ export default function ChatWidget() {
               return;
             }
           }
+        } else {
+          // Handle API error response
+          const errorData = await aiResponse.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(errorData.error || `API error: ${aiResponse.status}`);
         }
       } catch (aiError) {
         console.error('AI chat failed:', aiError);
