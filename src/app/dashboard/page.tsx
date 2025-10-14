@@ -5,7 +5,6 @@ import { BarChart3, Clock, CheckCircle, AlertTriangle, Users, TrendingUp, Activi
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { fetcher } from '@/lib/utils';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 interface DashboardStats {
   total_tickets: number;
@@ -15,49 +14,22 @@ interface DashboardStats {
   sla_compliance: number;
 }
 
-interface TicketTrend {
-  period: string;
-  data: Array<{ date: string; count: number }>;
-}
-
-interface RecentTicket {
-  id: string;
-  ticket_number: string;
-  title: string;
-  category: string;
-  priority: string;
-  status: string;
-  assigned_to?: string;
-  created_at: string;
-}
-
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [trendData, setTrendData] = useState<TicketTrend | null>(null);
-  const [recentTickets, setRecentTickets] = useState<RecentTicket[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadStats = async () => {
       try {
-        // Fetch stats
-        const statsData = await fetcher('/api/analytics/summary');
-        setStats(statsData);
-
-        // Fetch trend data
-        const trendResponse = await fetcher('/api/analytics/tickets/trend?days=30');
-        setTrendData(trendResponse);
-
-        // Fetch recent tickets
-        const ticketsResponse = await fetcher('/api/tickets?limit=5');
-        setRecentTickets(ticketsResponse || []);
+        const data = await fetcher('/api/analytics/summary');
+        setStats(data);
       } catch (error) {
-        console.error('Failed to load dashboard data:', error);
+        console.error('Failed to load stats:', error);
       } finally {
         setLoading(false);
       }
     };
-    loadData();
+    loadStats();
   }, []);
 
   const statCards = [
@@ -163,45 +135,12 @@ export default function Dashboard() {
               <h2 className="text-xl font-bold text-white">Ticket Trends</h2>
               <BarChart3 className="w-5 h-5 text-glow-white" />
             </div>
-            <div className="h-64">
-              {trendData ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={trendData.data}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis
-                      dataKey="date"
-                      stroke="#9CA3AF"
-                      fontSize={12}
-                      tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    />
-                    <YAxis stroke="#9CA3AF" fontSize={12} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#1F2937',
-                        border: '1px solid #374151',
-                        borderRadius: '8px',
-                        color: '#F9FAFB'
-                      }}
-                      labelFormatter={(value) => new Date(value).toLocaleDateString()}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="count"
-                      stroke="#60A5FA"
-                      strokeWidth={2}
-                      dot={{ fill: '#60A5FA', strokeWidth: 2, r: 4 }}
-                      activeDot={{ r: 6, stroke: '#60A5FA', strokeWidth: 2 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="flex items-center justify-center h-full text-midnight-300">
-                  <div className="text-center">
-                    <BarChart3 className="w-16 h-16 mx-auto mb-4 opacity-50 text-glow-white" />
-                    <p>Loading chart data...</p>
-                  </div>
-                </div>
-              )}
+            <div className="h-64 flex items-center justify-center text-midnight-300">
+              <div className="text-center">
+                <BarChart3 className="w-16 h-16 mx-auto mb-4 opacity-50 text-glow-white" />
+                <p>Chart visualization coming soon</p>
+                <p className="text-sm text-midnight-400">Recharts integration</p>
+              </div>
             </div>
           </motion.div>
 
@@ -284,10 +223,14 @@ export default function Dashboard() {
                       Loading tickets...
                     </td>
                   </tr>
-                ) : recentTickets.length > 0 ? (
-                  recentTickets.map((ticket) => (
+                ) : (
+                  [
+                    { id: 'TKT-001', title: 'SCADA System Connectivity Issue', category: 'SCADA System', priority: 'critical', status: 'open', assigned: 'Control Center Team' },
+                    { id: 'TKT-002', title: 'SAP Password Reset Request', category: 'SAP ERP', priority: 'low', status: 'resolved', assigned: 'IT Security Team' },
+                    { id: 'TKT-003', title: 'Transmission Line Monitoring Alert', category: 'Transmission Network', priority: 'high', status: 'in-progress', assigned: 'Network Operations' },
+                  ].map((ticket) => (
                     <tr key={ticket.id} className="hover:bg-glow-white/5 transition-colors">
-                      <td className="py-4 text-glow-white font-mono">{ticket.ticket_number}</td>
+                      <td className="py-4 text-glow-white font-mono">{ticket.id}</td>
                       <td className="py-4 text-white">{ticket.title}</td>
                       <td className="py-4 text-midnight-300">{ticket.category}</td>
                       <td className="py-4">
@@ -302,21 +245,15 @@ export default function Dashboard() {
                       <td className="py-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                           ticket.status === 'resolved' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                          ticket.status === 'in_progress' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                          ticket.status === 'in-progress' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
                           'bg-gray-500/20 text-gray-400 border border-gray-500/30'
                         }`}>
-                          {ticket.status.replace('_', ' ')}
+                          {ticket.status}
                         </span>
                       </td>
-                      <td className="py-4 text-midnight-300">{ticket.assigned_to || 'Unassigned'}</td>
+                      <td className="py-4 text-midnight-300">{ticket.assigned}</td>
                     </tr>
                   ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-midnight-300">
-                      No recent tickets found
-                    </td>
-                  </tr>
                 )}
               </tbody>
             </table>

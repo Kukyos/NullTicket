@@ -43,14 +43,14 @@ def serialize_ticket(ticket: Ticket) -> dict:
         assigned_to = None
 
     return {
-        "id": str(ticket.id),  # Convert to string for frontend
+        "id": ticket.id,
         "ticket_number": ticket.ticket_number,
         "title": ticket.title,
         "description": ticket.description,
-        "category": ticket.category.value if ticket.category else "general",
-        "priority": ticket.priority.value if ticket.priority else "medium",
-        "status": ticket.status.value if ticket.status else "new",
-        "source": ticket.source.value if ticket.source else "web_form",
+        "category": ticket.category.value if ticket.category else None,
+        "priority": ticket.priority.value if ticket.priority else None,
+        "status": ticket.status.value if ticket.status else None,
+        "source": ticket.source.value if ticket.source else None,
         "assigned_team_id": ticket.assigned_team_id,
         "assigned_to": assigned_to,
         "requester_name": ticket.requester_name,
