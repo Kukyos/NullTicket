@@ -46,6 +46,15 @@ class SMSService:
         message = f"⚠️ SLA ALERT: {ticket_id} is approaching deadline. Please review immediately."
         await self.send_sms(to_number, message)
 
+    async def send_resolution_notification(self, to_number: str, ticket_id: str, resolution_message: str):
+        """Send ticket resolution notification via SMS."""
+        # Truncate message to fit SMS limits (160 characters typical)
+        if len(resolution_message) > 120:
+            resolution_message = resolution_message[:117] + "..."
+        
+        message = f"✅ RESOLVED: {ticket_id} - {resolution_message}"
+        await self.send_sms(to_number, message)
+
 
 # Global instance
 sms_service = SMSService()

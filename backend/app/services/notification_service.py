@@ -233,6 +233,25 @@ Immediate attention required!
         if team and team.email:
             await email_service.send_email([team.email], subject, body)
 
+    async def notify_ticket_resolution(self, ticket: Ticket, resolution_message: str):
+        """Send resolution notification to requester"""
+        # Send email notification
+        if ticket.requester_email:
+            await email_service.send_ticket_resolution(
+                ticket.ticket_number,
+                ticket.requester_email,
+                ticket.title,
+                ticket.category.value if ticket.category else "general",
+                resolution_message
+            )
+
+        # Send SMS notification
+        if ticket.requester_phone:
+            sms_message = f"✅ RESOLVED: {ticket.ticket_number} - {resolution_message[:100]}{'...' if len(resolution_message) > 100 else ''}"
+            await sms_service.send_resolution_notification(ticket.requester_phone, ticket.ticket_number, sms_message)
+
+        logger.info(f"Resolution notification sent for ticket {ticket.ticket_number}")
+
 
 # Global instance
 notification_service = NotificationService()

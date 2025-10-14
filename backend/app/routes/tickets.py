@@ -278,6 +278,7 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
 async def update_ticket_status(
     ticket_id: int,
     status: str,
+    resolution: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     """Update ticket status"""
@@ -294,8 +295,11 @@ async def update_ticket_status(
     ticket.status = new_status_enum
     ticket.updated_at = datetime.utcnow()
     
-    if ticket.status in [TicketStatus.RESOLVED, TicketStatus.CLOSED]:
+    # Handle resolution
+    if ticket.status == TicketStatus.RESOLVED:
         ticket.resolved_at = datetime.utcnow()
+        if resolution:
+            ticket.resolution = resolution
     
     db.commit()
     
@@ -308,11 +312,79 @@ async def update_ticket_status(
         )
     )
     
+    # Send resolution notification if ticket was resolved with a message
+    if ticket.status == TicketStatus.RESOLVED and resolution:
+        from ..services.notification_service import notification_service
+        asyncio.create_task(
+            notification_service.notify_ticket_resolution(ticket, resolution)
+        )
+    
     return {
         "success": True,
         "old_status": old_status,
         "new_status": ticket.status.value,
+        "resolution_saved": bool(resolution)
     }
+
+@router.put("/{ticket_id}")
+async def update_ticket(
+    ticket_id: int,
+    title: Optional[str] = None,
+    description: Optional[str] = None,
+    category: Optional[str] = None,
+    priority: Optional[str] = None,
+    status: Optional[str] = None,
+    assigned_to: Optional[str] = None,
+    resolution: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """Update ticket details"""
+    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    # Update fields if provided
+    if title is not None:
+        ticket.title = title
+    if description is not None:
+        ticket.description = description
+    if category is not None:
+        try:
+            ticket.category = _to_category_enum(category)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid category value")
+    if priority is not None:
+        try:
+            ticket.priority = _to_priority_enum(priority)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid priority value")
+    if status is not None:
+        try:
+            new_status_enum = _to_status_enum(status)
+            old_status = ticket.status.value if ticket.status else None
+            ticket.status = new_status_enum
+            
+            # Handle resolution
+            if ticket.status == TicketStatus.RESOLVED:
+                ticket.resolved_at = datetime.utcnow()
+                if resolution:
+                    ticket.resolution = resolution
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid status value")
+    if resolution is not None and ticket.status == TicketStatus.RESOLVED:
+        ticket.resolution = resolution
+
+    ticket.updated_at = datetime.utcnow()
+    db.commit()
+    
+    # Send notifications if status changed to resolved
+    if status == "resolved" and resolution:
+        from ..services.notification_service import notification_service
+        asyncio.create_task(
+            notification_service.notify_ticket_resolution(ticket, resolution)
+        )
+    
+    return serialize_ticket(ticket)
 
 @router.delete("/{ticket_id}")
 async def delete_ticket(ticket_id: int, db: Session = Depends(get_db)):

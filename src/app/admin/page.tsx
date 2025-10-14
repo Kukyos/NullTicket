@@ -15,6 +15,9 @@ export default function Admin() {
   const [loadingPatterns, setLoadingPatterns] = useState(false);
   const [tickets, setTickets] = useState([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
+  const [showResolutionModal, setShowResolutionModal] = useState(false);
+  const [resolvingTicket, setResolvingTicket] = useState<any>(null);
+  const [resolutionMessage, setResolutionMessage] = useState('');
 
   useEffect(() => {
     if (activeTab === 'kb' && isAuthenticated) {
@@ -69,6 +72,33 @@ export default function Admin() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'resolved' })
       });
+      loadTickets(); // Refresh the tickets list
+    } catch (err) {
+      console.error('Failed to resolve ticket:', err);
+    }
+  };
+
+  const openResolutionModal = (ticket: any) => {
+    setResolvingTicket(ticket);
+    setResolutionMessage('');
+    setShowResolutionModal(true);
+  };
+
+  const handleResolveWithMessage = async () => {
+    if (!resolvingTicket || !resolutionMessage.trim()) return;
+
+    try {
+      await fetcher(`/api/tickets/${resolvingTicket.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          status: 'resolved',
+          resolution: resolutionMessage.trim()
+        })
+      });
+      setShowResolutionModal(false);
+      setResolvingTicket(null);
+      setResolutionMessage('');
       loadTickets(); // Refresh the tickets list
     } catch (err) {
       console.error('Failed to resolve ticket:', err);
@@ -267,7 +297,7 @@ export default function Admin() {
                                   <option value="closed">Closed</option>
                                 </select>
                                 <button
-                                  onClick={() => resolveTicket(ticket.id)}
+                                  onClick={() => openResolutionModal(ticket)}
                                   className="btn-glow-primary flex items-center space-x-2"
                                 >
                                   <CheckCircle className="w-4 h-4" />
@@ -451,6 +481,73 @@ export default function Admin() {
           </div>
         </div>
       </div>
+
+      {/* Resolution Modal */}
+      {showResolutionModal && resolvingTicket && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="glass p-6 rounded-2xl border border-glow-white max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Resolve Ticket</h2>
+              <button
+                onClick={() => setShowResolutionModal(false)}
+                className="text-midnight-400 hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <div className="glass-strong p-4 rounded-lg border border-glow-white/50 mb-4">
+                <h3 className="text-lg font-semibold mb-2 text-white">{resolvingTicket.title}</h3>
+                <p className="text-midnight-300 text-sm mb-2">Ticket #{resolvingTicket.ticket_number}</p>
+                <p className="text-midnight-200">{resolvingTicket.description}</p>
+                <div className="flex items-center space-x-4 mt-3 text-sm text-midnight-300">
+                  <span>Requester: {resolvingTicket.requester_name}</span>
+                  <span>Category: {resolvingTicket.category}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-2 text-midnight-200">
+                  Resolution Message <span className="text-red-400">*</span>
+                </label>
+                <textarea
+                  value={resolutionMessage}
+                  onChange={(e) => setResolutionMessage(e.target.value)}
+                  placeholder="Please provide a detailed resolution message explaining how the issue was resolved. This will be sent to the ticket requester via email and SMS."
+                  rows={6}
+                  className="input-glow w-full resize-vertical"
+                  required
+                />
+                <p className="text-xs text-midnight-400 mt-2">
+                  This message will be sent to the requester via email and SMS when the ticket is resolved.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowResolutionModal(false)}
+                className="px-6 py-3 glass-strong hover:bg-midnight-800 text-white rounded-lg transition-colors border border-glow-white/30"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleResolveWithMessage}
+                disabled={!resolutionMessage.trim()}
+                className="px-6 py-3 btn-glow-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              >
+                <CheckCircle className="w-5 h-5" />
+                <span>Resolve Ticket</span>
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

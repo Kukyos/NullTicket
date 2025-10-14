@@ -141,6 +141,95 @@ NullTicket Alert System
 """
         await self.send_email([team_email], subject, body, html_body)
 
+    async def send_ticket_resolution(self, ticket_id: str, email: str, title: str, category: str, resolution_message: str):
+        """Send ticket resolution notification."""
+        subject = f"✅ Ticket Resolved: {ticket_id}"
+        body = f"""
+Your ticket has been resolved!
+
+Ticket Number: {ticket_id}
+Title: {title}
+Category: {category}
+
+Resolution Details:
+{resolution_message}
+
+If you have any further questions or need additional assistance, please don't hesitate to create a new ticket.
+
+Thank you for using POWERGRID Helpdesk!
+"""
+
+        html_body = f"""
+<html>
+<body style="font-family: Arial, sans-serif; color: #333; margin: 0; padding: 0; background: #f4f4f4;">
+    <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 30px 20px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px; font-weight: bold;">🎯 POWERGRID</h1>
+            <p style="color: #e0e7ff; margin: 5px 0 0 0; font-size: 14px;">Smart Helpdesk System</p>
+        </div>
+
+        <!-- Content -->
+        <div style="padding: 30px 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size: 48px; margin-bottom: 10px;">✅</div>
+                <h2 style="color: #059669; margin: 0; font-size: 24px; font-weight: bold;">Ticket Resolved</h2>
+                <p style="color: #6b7280; margin: 10px 0 0 0;">Your support request has been successfully resolved</p>
+            </div>
+
+            <!-- Ticket Details -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 18px;">Ticket Details</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-weight: 500; width: 120px;">Ticket ID:</td>
+                        <td style="padding: 8px 0; color: #1f2937; font-weight: bold;">{ticket_id}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-weight: 500;">Title:</td>
+                        <td style="padding: 8px 0; color: #1f2937;">{title}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #6b7280; font-weight: 500;">Category:</td>
+                        <td style="padding: 8px 0; color: #1f2937;">{category.replace('_', ' ').title()}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Resolution Message -->
+            <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <h3 style="margin: 0 0 15px 0; color: #065f46; font-size: 18px;">📋 Resolution Details</h3>
+                <div style="color: #065f46; line-height: 1.6; white-space: pre-line;">
+                    {resolution_message}
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                <p style="color: #6b7280; margin: 0; font-size: 14px;">
+                    If you have any further questions or need additional assistance,<br>
+                    please don't hesitate to create a new ticket through our helpdesk portal.
+                </p>
+                <p style="color: #9ca3af; margin: 15px 0 0 0; font-size: 12px;">
+                    Thank you for using POWERGRID Helpdesk System<br>
+                    <strong>India's Largest Power Transmission Company</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="background: #1f2937; color: #9ca3af; padding: 20px; text-align: center; font-size: 12px;">
+            <p style="margin: 0;">
+                This is an automated message from POWERGRID Helpdesk System.<br>
+                Please do not reply to this email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+        await self.send_email([email], subject, body, html_body)
+
 
 # Global instance
 email_service = EmailService()
