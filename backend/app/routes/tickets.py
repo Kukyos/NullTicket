@@ -137,15 +137,18 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
     """Create a new ticket manually"""
     try:
         logger.info(f"Starting ticket creation for: {ticket_data.title}")
-        
+
+        # DEBUG: Log the exact input data
+        logger.info(f"Input data: title={ticket_data.title}, desc={ticket_data.description[:50]}..., email={ticket_data.requester_email}, priority={ticket_data.priority}, category={ticket_data.category}")
+
         from ..services.classification_service import classification_service
         from ..services.routing_service import routing_service
-        
+
         # Generate ticket number
         import uuid
         ticket_number = f"TKT-{datetime.utcnow().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8].upper()}"
         logger.info(f"Generated ticket number: {ticket_number}")
-        
+
         # Create ticket
         ticket = Ticket(
             ticket_number=ticket_number,
@@ -157,7 +160,7 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
             source=TicketSource.WEB_FORM,
         )
         logger.info(f"Ticket object created: {ticket.ticket_number}")
-        
+
         # Seed defaults from request payload
         initial_category = ticket_data.category
         initial_priority = ticket_data.priority
@@ -210,7 +213,7 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
                     logger.warning("Unexpected classification priority: %s", priority_value)
 
             ticket.ai_classification_confidence = classification.get("confidence", 0.0)
-        
+
         # Route to team
         try:
             logger.info("Starting routing...")
@@ -222,7 +225,7 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
                 logger.info("No team assigned")
         except Exception as e:
             logger.warning(f"Routing service failed: {e}")
-        
+
         # Save
         try:
             logger.info("Saving ticket to database...")
@@ -234,7 +237,7 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
             logger.error(f"Database save failed: {e}")
             db.rollback()
             raise HTTPException(status_code=500, detail=f"Failed to save ticket: {str(e)}")
-        
+
         # Send notification (non-blocking)
         try:
             logger.info("Sending notification...")
@@ -248,12 +251,13 @@ async def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)
             logger.info("Notification sent")
         except Exception as e:
             logger.warning(f"Failed to send email notification: {e}")
-        
+
         logger.info(f"Ticket creation completed, returning: {ticket.ticket_number}")
         result = serialize_ticket(ticket)
+        logger.info(f"Serialized result keys: {list(result.keys())}")
         logger.info(f"Serialized result: {result}")
         return result
-        
+
     except Exception as e:
         # Catch any unhandled exceptions and return error details for debugging
         logger.error(f"Unhandled exception in ticket creation: {e}", exc_info=True)

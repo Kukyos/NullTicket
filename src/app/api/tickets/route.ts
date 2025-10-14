@@ -63,9 +63,17 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    console.log('=== TICKET CREATION API ROUTE ===');
+    console.log('API_BASE_URL:', API_BASE_URL);
+    console.log('NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
 
-    const response = await fetch(`${API_BASE_URL}/api/tickets`, {
+    const body = await request.json();
+    console.log('Request body received:', JSON.stringify(body, null, 2));
+
+    const railwayUrl = `${API_BASE_URL}/api/tickets`;
+    console.log('Calling Railway URL:', railwayUrl);
+
+    const response = await fetch(railwayUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -73,10 +81,19 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
+    console.log('Railway response status:', response.status);
+    console.log('Railway response statusText:', response.statusText);
+    console.log('Railway response headers:', Object.fromEntries(response.headers.entries()));
+
+    const responseText = await response.text();
+    console.log('Railway response body (raw):', responseText);
+
     if (!response.ok) {
-      // Forward the actual backend error
+      console.log('Railway returned error status, forwarding...');
+      // Try to parse as JSON, fallback to text
       try {
-        const errorData = await response.json();
+        const errorData = JSON.parse(responseText);
+        console.log('Parsed error data:', errorData);
         return NextResponse.json(errorData, {
           status: response.status,
           headers: {
@@ -86,8 +103,9 @@ export async function POST(request: NextRequest) {
           },
         });
       } catch (e) {
+        console.log('Could not parse error as JSON:', e);
         return NextResponse.json(
-          { error: `Backend error: ${response.status} ${response.statusText}` },
+          { error: `Backend error: ${response.status} ${response.statusText} - ${responseText}` },
           {
             status: response.status,
             headers: {
@@ -100,7 +118,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const data = await response.json();
+    // Try to parse successful response
+    let data;
+    try {
+      data = JSON.parse(responseText);
+      console.log('Parsed success data:', data);
+    } catch (e) {
+      console.log('Could not parse success response as JSON:', e);
+      return NextResponse.json(
+        { error: 'Invalid JSON response from backend' },
+        {
+          status: 502,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          },
+        }
+      );
+    }
+
+    console.log('Returning data to frontend:', data);
     return NextResponse.json(data, {
       headers: {
         'Access-Control-Allow-Origin': '*',
@@ -109,9 +147,17 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Create ticket API error:', error);
+    console.error('=== TICKET CREATION ERROR ===');
+    console.error('Error type:', typeof error);
+    console.error('Error message:', error instanceof Error ? error.message : String(error));
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : String(error),
+        timestamp: new Date().toISOString()
+      },
       {
         status: 500,
         headers: {
