@@ -295,7 +295,7 @@ export default function Home() {
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        className="fixed bottom-8 right-8 z-50"
+        className="fixed bottom-8 right-32 z-50"
       >
         <Link
           href="/tickets/new"
