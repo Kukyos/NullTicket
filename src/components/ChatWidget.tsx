@@ -597,7 +597,7 @@ Need immediate hardware assistance? I can create an urgent support ticket.`;
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-lg glow-hover flex items-center justify-center z-50 transition-all"
+        className="fixed bottom-6 right-6 w-16 h-16 btn-glow-primary flex items-center justify-center z-50 transition-all"
       >
         {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}
       </motion.button>
@@ -609,17 +609,17 @@ Need immediate hardware assistance? I can create an urgent support ticket.`;
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-24 right-6 w-96 h-[500px] glass-strong border border-blue-500/30 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
+            className="fixed bottom-24 right-6 w-96 h-[500px] glass-strong border border-glow-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
+            <div className="bg-midnight-800 border-b border-glow-white p-4 text-white">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5" />
+                <div className="w-10 h-10 bg-midnight-700 rounded-full flex items-center justify-center border border-glow-white/50">
+                  <MessageSquare className="w-5 h-5 text-glow-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold">NullTicket Support</h3>
-                  <p className="text-xs text-blue-100">AI-Powered Assistant</p>
+                  <h3 className="font-bold text-white">NullTicket Support</h3>
+                  <p className="text-xs text-midnight-300">AI-Powered Assistant</p>
                 </div>
               </div>
             </div>
@@ -633,10 +633,10 @@ Need immediate hardware assistance? I can create an urgent support ticket.`;
                   animate={{ opacity: 1, y: 0 }}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[80%] p-3 rounded-lg ${
+                  <div className={`max-w-[80%] p-3 rounded-lg border ${
                     message.role === 'user'
-                      ? 'bg-blue-600 text-white rounded-br-none'
-                      : 'bg-gray-800 text-gray-100 rounded-bl-none'
+                      ? 'bg-white text-midnight-900 rounded-br-none border-glow-white'
+                      : 'bg-midnight-800 text-midnight-100 rounded-bl-none border-glow-white/50'
                   }`}>
                     {message.content}
                   </div>
@@ -644,11 +644,11 @@ Need immediate hardware assistance? I can create an urgent support ticket.`;
               ))}
               {loading && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-800 text-gray-100 p-3 rounded-lg rounded-bl-none">
+                  <div className="bg-midnight-800 text-midnight-100 p-3 rounded-lg rounded-bl-none border border-glow-white/50">
                     <div className="flex space-x-2">
-                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <div className="w-2 h-2 bg-glow-white/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 bg-glow-white/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 bg-glow-white/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                   </div>
                 </div>
@@ -656,7 +656,7 @@ Need immediate hardware assistance? I can create an urgent support ticket.`;
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-gray-800">
+            <div className="p-4 border-t border-glow-white/30">
               <div className="flex space-x-2">
                 <input
                   type="text"
@@ -664,13 +664,13 @@ Need immediate hardware assistance? I can create an urgent support ticket.`;
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                   placeholder="Type your message..."
-                  className="flex-1 px-4 py-2 bg-gray-900/50 border border-gray-700 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
+                  className="input-glow flex-1"
                   disabled={loading}
                 />
                 <button
                   onClick={handleSend}
                   disabled={loading || !input.trim()}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 btn-glow-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
                   <Send className="w-5 h-5" />
                 </button>
@@ -694,23 +694,23 @@ Need immediate hardware assistance? I can create an urgent support ticket.`;
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gray-900 border border-gray-700 rounded-2xl p-6 max-w-md mx-4"
+              className="glass border border-glow-white rounded-2xl p-6 max-w-md mx-4"
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-xl font-bold text-white mb-4">Create Support Ticket</h3>
-              <p className="text-gray-300 mb-6">
+              <p className="text-midnight-200 mb-6">
                 Based on your conversation, I can create a support ticket to help resolve this issue.
                 Our team will review it and get back to you.
               </p>
 
               {pendingTicketData && (
-                <div className="bg-gray-800 rounded-lg p-4 mb-6">
+                <div className="glass-strong rounded-lg p-4 mb-6 border border-glow-white/50">
                   <h4 className="font-semibold text-white mb-2">Ticket Details:</h4>
-                  <p className="text-sm text-gray-300">
-                    <strong>Title:</strong> {pendingTicketData.title}
+                  <p className="text-sm text-midnight-200">
+                    <strong className="text-white">Title:</strong> {pendingTicketData.title}
                   </p>
-                  <p className="text-sm text-gray-300 mt-1">
-                    <strong>Description:</strong> {pendingTicketData.description}
+                  <p className="text-sm text-midnight-200 mt-1">
+                    <strong className="text-white">Description:</strong> {pendingTicketData.description}
                   </p>
                 </div>
               )}
@@ -718,13 +718,13 @@ Need immediate hardware assistance? I can create an urgent support ticket.`;
               <div className="flex space-x-3">
                 <button
                   onClick={() => handleTicketConfirm(false)}
-                  className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2 bg-midnight-700 hover:bg-midnight-600 text-midnight-200 rounded-lg transition-colors border border-glow-white/30"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleTicketConfirm(true)}
-                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2 btn-glow-primary"
                 >
                   Create Ticket
                 </button>

@@ -29,37 +29,37 @@ export default function Home() {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950/20 to-gray-950">
+    <div className="min-h-screen bg-gradient-to-br from-midnight-900 via-midnight-800 to-midnight-900">
       {/* Navigation */}
-      <nav className="glass-strong border-b border-blue-500/30 sticky top-0 z-50">
+      <nav className="nav-glow sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center space-x-3"
             >
-              <Shield className="w-8 h-8 text-blue-400 glow" />
-              <span className="text-2xl font-bold text-glow">NullTicket</span>
+              <Shield className="w-8 h-8 text-glow-white glow-white" />
+              <span className="text-2xl font-bold text-glow-white">NullTicket</span>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center space-x-6"
             >
-              <Link href="/dashboard" className="text-gray-300 hover:text-blue-400 transition-colors">
+              <Link href="/dashboard" className="text-midnight-200 hover:text-white transition-colors glow-white-hover">
                 Dashboard
               </Link>
-              <Link href="/tickets" className="text-gray-300 hover:text-blue-400 transition-colors">
+              <Link href="/tickets" className="text-midnight-200 hover:text-white transition-colors glow-white-hover">
                 Tickets
               </Link>
-              <Link href="/admin" className="text-gray-300 hover:text-blue-400 transition-colors">
+              <Link href="/admin" className="text-midnight-200 hover:text-white transition-colors glow-white-hover">
                 Admin
               </Link>
-              <Link 
-                href="/dashboard" 
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg glow-hover transition-all"
+              <Link
+                href="/dashboard"
+                className="btn-glow-primary"
               >
                 Get Started
               </Link>
@@ -78,27 +78,27 @@ export default function Home() {
           >
             <h1 className="text-6xl font-bold mb-6 leading-tight">
               Smart Helpdesk
-              <span className="block text-blue-400 text-glow">Ticketing Solution</span>
+              <span className="block text-glow-white text-glow-white">Ticketing Solution</span>
             </h1>
-            <p className="text-xl text-gray-400 mb-8">
+            <p className="text-xl text-midnight-300 mb-8">
               AI-powered unified ticketing system for POWERGRID. Consolidate all IT support channels into one intelligent platform with automated classification, routing, and resolution.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link 
+              <Link
                 href="/tickets/new"
-                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-lg glow-hover transition-all font-semibold text-center shadow-lg"
+                className="btn-glow-primary text-lg px-8 py-4"
               >
                 🚀 Create New Ticket
               </Link>
-              <Link 
+              <Link
                 href="/dashboard"
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg glow-hover transition-all font-semibold text-center"
+                className="btn-glow text-lg px-8 py-4"
               >
                 Launch Dashboard
               </Link>
-              <Link 
+              <Link
                 href="/tickets"
-                className="px-8 py-4 glass-strong hover:bg-blue-900/20 text-white rounded-lg transition-all font-semibold text-center"
+                className="glass-hover text-white text-lg px-8 py-4 rounded-lg transition-all font-semibold text-center hover:glow-white-hover"
               >
                 View Tickets
               </Link>
@@ -111,7 +111,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            <div className="glass p-8 rounded-2xl border border-blue-500/30 animate-float">
+            <div className="glass p-8 rounded-2xl border border-glow-white animate-float">
               <div className="grid grid-cols-2 gap-4">
                 {[
                   { icon: Brain, label: 'AI Classification', value: '98%' },
@@ -124,11 +124,11 @@ export default function Home() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 + i * 0.1 }}
-                    className="glass-strong p-6 rounded-xl text-center hover:bg-blue-900/20 transition-all glow-hover"
+                    className="glass-strong p-6 rounded-xl text-center hover:glass-hover transition-all glow-white-hover"
                   >
-                    <stat.icon className="w-8 h-8 mx-auto mb-3 text-blue-400" />
-                    <div className="text-3xl font-bold text-blue-400 mb-1">{stat.value}</div>
-                    <div className="text-sm text-gray-400">{stat.label}</div>
+                    <stat.icon className="w-8 h-8 mx-auto mb-3 text-glow-white" />
+                    <div className="text-3xl font-bold text-glow-white mb-1">{stat.value}</div>
+                    <div className="text-sm text-midnight-300">{stat.label}</div>
                   </motion.div>
                 ))}
               </div>
@@ -143,21 +143,21 @@ export default function Home() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass p-8 rounded-2xl border border-blue-500/30 max-w-4xl mx-auto"
+          className="glass p-8 rounded-2xl border border-glow-white max-w-4xl mx-auto"
         >
           <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-            <Shield className="w-8 h-8 text-blue-400" />
+            <Shield className="w-8 h-8 text-glow-white" />
             System Status
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Backend Connection */}
-            <div className="flex items-center gap-4 p-6 bg-gray-900/50 rounded-xl border border-blue-500/20">
+            <div className="flex items-center gap-4 p-6 glass-strong rounded-xl border border-glow-white">
               {backendStatus === 'checking' && <AlertCircle className="w-6 h-6 text-yellow-500 animate-pulse" />}
               {backendStatus === 'connected' && <CheckCircle className="w-6 h-6 text-green-500" />}
               {backendStatus === 'disconnected' && <XCircle className="w-6 h-6 text-red-500" />}
               <div>
                 <p className="font-semibold text-white text-lg">Backend API</p>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-midnight-300">
                   {backendStatus === 'checking' && 'Checking connection...'}
                   {backendStatus === 'connected' && 'Connected & Ready'}
                   {backendStatus === 'disconnected' && 'Connection Failed'}
@@ -166,7 +166,7 @@ export default function Home() {
             </div>
 
             {/* Database Status */}
-            <div className="flex items-center gap-4 p-6 bg-gray-900/50 rounded-xl border border-blue-500/20">
+            <div className="flex items-center gap-4 p-6 glass-strong rounded-xl border border-glow-white">
               {apiHealth?.database === 'healthy' ? (
                 <CheckCircle className="w-6 h-6 text-green-500" />
               ) : apiHealth?.database === 'unhealthy' ? (
@@ -176,7 +176,7 @@ export default function Home() {
               )}
               <div>
                 <p className="font-semibold text-white text-lg">Database</p>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-midnight-300">
                   {apiHealth?.database === 'healthy' && 'PostgreSQL Connected'}
                   {apiHealth?.database === 'unhealthy' && 'Connection Failed'}
                   {!apiHealth?.database && 'Checking...'}
@@ -185,7 +185,7 @@ export default function Home() {
             </div>
 
             {/* AI Services */}
-            <div className="flex items-center gap-4 p-6 bg-gray-900/50 rounded-xl border border-blue-500/20">
+            <div className="flex items-center gap-4 p-6 glass-strong rounded-xl border border-glow-white">
               {apiHealth?.ai_services === 'healthy' ? (
                 <CheckCircle className="w-6 h-6 text-green-500" />
               ) : apiHealth?.ai_services === 'unhealthy' ? (
@@ -195,7 +195,7 @@ export default function Home() {
               )}
               <div>
                 <p className="font-semibold text-white text-lg">AI Services</p>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-midnight-300">
                   {apiHealth?.ai_services === 'healthy' && 'LLaMA 3.1 Available'}
                   {apiHealth?.ai_services === 'unhealthy' && 'Service Unavailable'}
                   {!apiHealth?.ai_services && 'Checking...'}
@@ -214,8 +214,8 @@ export default function Home() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold mb-4">Unified Ticket Management</h2>
-          <p className="text-xl text-gray-400">All your IT support channels in one powerful platform</p>
+          <h2 className="text-4xl font-bold mb-4 text-white">Unified Ticket Management</h2>
+          <p className="text-xl text-midnight-300">All your IT support channels in one powerful platform</p>
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -257,11 +257,11 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="glass p-8 rounded-2xl border border-blue-500/20 hover:border-blue-500/50 transition-all glow-hover group"
+              className="glass p-8 rounded-2xl border border-glow-white hover:border-glow-white/80 transition-all glow-hover group"
             >
-              <feature.icon className="w-12 h-12 text-blue-400 mb-4 group-hover:scale-110 transition-transform" />
-              <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-              <p className="text-gray-400">{feature.description}</p>
+              <feature.icon className="w-12 h-12 text-glow-white mb-4 group-hover:scale-110 transition-transform" />
+              <h3 className="text-xl font-bold mb-3 text-white">{feature.title}</h3>
+              <p className="text-midnight-300">{feature.description}</p>
             </motion.div>
           ))}
         </div>
@@ -273,17 +273,17 @@ export default function Home() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass p-16 rounded-3xl border border-blue-500/30 text-center relative overflow-hidden"
+          className="glass p-16 rounded-3xl border border-glow-white text-center relative overflow-hidden"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 animate-glow" />
+          <div className="absolute inset-0 bg-gradient-to-r from-midnight-900/20 to-midnight-800/20 animate-glow" />
           <div className="relative z-10">
-            <h2 className="text-5xl font-bold mb-6">Ready to Transform IT Support?</h2>
-            <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+            <h2 className="text-5xl font-bold mb-6 text-white">Ready to Transform IT Support?</h2>
+            <p className="text-xl text-midnight-300 mb-8 max-w-2xl mx-auto">
               Join POWERGRID in modernizing helpdesk operations with AI-powered automation
             </p>
             <Link 
               href="/dashboard"
-              className="inline-block px-12 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg glow-hover transition-all font-semibold text-lg"
+              className="inline-block px-12 py-4 btn-glow-primary text-white rounded-lg glow-hover transition-all font-semibold text-lg"
             >
               Get Started Now
             </Link>
@@ -299,7 +299,7 @@ export default function Home() {
       >
         <Link
           href="/tickets/new"
-          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-full shadow-lg glow-hover transition-all font-semibold group"
+          className="flex items-center space-x-2 px-6 py-3 btn-glow-primary text-white rounded-full shadow-lg glow-hover transition-all font-semibold group"
         >
           <span className="text-lg">🎫</span>
           <span className="hidden sm:inline">Create Ticket</span>
@@ -313,14 +313,14 @@ export default function Home() {
       </motion.div>
 
       {/* Footer */}
-      <footer className="glass-strong border-t border-blue-500/30 mt-20">
+      <footer className="glass-strong border-t border-glow-white mt-20">
         <div className="container mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Shield className="w-6 h-6 text-blue-400" />
-              <span className="font-bold">NullTicket</span>
+              <Shield className="w-6 h-6 text-glow-white" />
+              <span className="font-bold text-white">NullTicket</span>
             </div>
-            <div className="text-gray-400 text-sm">
+            <div className="text-midnight-300 text-sm">
               © 2025 POWERGRID. All rights reserved.
             </div>
           </div>

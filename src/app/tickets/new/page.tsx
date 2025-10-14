@@ -165,31 +165,31 @@ export default function NewTicket() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950/20 to-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-midnight-900 flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="glass p-8 rounded-2xl border border-blue-500/30 max-w-md w-full text-center"
+          className="glass p-8 rounded-2xl border border-glow-white max-w-md w-full text-center"
         >
           <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-6" />
-          <h2 className="text-2xl font-bold mb-4">Ticket Created Successfully!</h2>
-          <p className="text-gray-400 mb-6">
+          <h2 className="text-2xl font-bold mb-4 text-white">Ticket Created Successfully!</h2>
+          <p className="text-midnight-300 mb-6">
             Your ticket has been submitted and will be reviewed by our support team.
           </p>
-          <div className="glass-strong p-4 rounded-lg mb-6">
-            <div className="text-blue-400 font-mono text-lg font-bold">{ticketNumber}</div>
-            <div className="text-sm text-gray-500">Ticket Number</div>
+          <div className="glass-strong p-4 rounded-lg mb-6 border border-glow-white/50">
+            <div className="text-glow-white font-mono text-lg font-bold">{ticketNumber}</div>
+            <div className="text-sm text-midnight-400">Ticket Number</div>
           </div>
           <div className="flex space-x-4">
             <Link
               href="/tickets"
-              className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+              className="flex-1 btn-glow-primary"
             >
               View All Tickets
             </Link>
             <Link
               href="/"
-              className="flex-1 px-6 py-3 glass-strong hover:bg-blue-900/20 text-white rounded-lg transition-colors"
+              className="flex-1 px-6 py-3 glass-strong hover:bg-midnight-800 text-white rounded-lg transition-colors border border-glow-white/30"
             >
               Back to Home
             </Link>
@@ -200,24 +200,24 @@ export default function NewTicket() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950/20 to-gray-950">
+    <div className="min-h-screen bg-midnight-900">
       {/* Navigation */}
-      <nav className="glass-strong border-b border-blue-500/30 sticky top-0 z-50">
+      <nav className="nav-glow sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-3">
-              <AlertCircle className="w-8 h-8 text-blue-400 glow" />
-              <span className="text-2xl font-bold text-glow">NullTicket</span>
+              <AlertCircle className="w-8 h-8 text-glow-white" />
+              <span className="text-2xl font-bold text-white">NullTicket</span>
             </Link>
 
             <div className="flex items-center space-x-6">
-              <Link href="/dashboard" className="text-gray-300 hover:text-blue-400 transition-colors">
+              <Link href="/dashboard" className="text-midnight-300 hover:text-glow-white transition-colors">
                 Dashboard
               </Link>
-              <Link href="/tickets" className="text-gray-300 hover:text-blue-400 transition-colors">
+              <Link href="/tickets" className="text-midnight-300 hover:text-glow-white transition-colors">
                 Tickets
               </Link>
-              <Link href="/admin" className="text-gray-300 hover:text-blue-400 transition-colors">
+              <Link href="/admin" className="text-midnight-300 hover:text-glow-white transition-colors">
                 Admin
               </Link>
             </div>
@@ -234,13 +234,13 @@ export default function NewTicket() {
         >
           <Link
             href="/tickets"
-            className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-4"
+            className="inline-flex items-center space-x-2 text-midnight-400 hover:text-glow-white transition-colors mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Back to Tickets</span>
           </Link>
-          <h1 className="text-4xl font-bold mb-2 text-glow">Create New Ticket</h1>
-          <p className="text-gray-400">Submit a support request for assistance</p>
+          <h1 className="text-4xl font-bold mb-2 text-white">Create New Ticket</h1>
+          <p className="text-midnight-300">Submit a support request for assistance</p>
         </motion.div>
 
         {/* Form */}
@@ -250,9 +250,9 @@ export default function NewTicket() {
           transition={{ delay: 0.1 }}
           className="max-w-2xl"
         >
-          <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl border border-blue-500/20">
+          <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl border border-glow-white">
             {error && (
-              <div className="mb-6 p-4 bg-red-900/50 border border-red-500 text-red-200 rounded-lg">
+              <div className="mb-6 p-4 bg-red-900/20 border border-red-500/30 text-red-200 rounded-lg">
                 <div className="flex items-start space-x-3">
                   <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
@@ -266,7 +266,7 @@ export default function NewTicket() {
             <div className="grid md:grid-cols-2 gap-6 mb-6">
               {/* Title */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold mb-2 text-gray-300">
+                <label className="block text-sm font-semibold mb-2 text-midnight-200">
                   Title <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -276,13 +276,13 @@ export default function NewTicket() {
                   onChange={handleChange}
                   required
                   placeholder="Brief description of your issue"
-                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
+                  className="input-glow w-full"
                 />
               </div>
 
               {/* Requester Name */}
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-300">
+                <label className="block text-sm font-semibold mb-2 text-midnight-200">
                   Your Name <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -292,13 +292,13 @@ export default function NewTicket() {
                   onChange={handleChange}
                   required
                   placeholder="Full name"
-                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
+                  className="input-glow w-full"
                 />
               </div>
 
               {/* Requester Email */}
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-300">
+                <label className="block text-sm font-semibold mb-2 text-midnight-200">
                   Email Address <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -308,13 +308,13 @@ export default function NewTicket() {
                   onChange={handleChange}
                   required
                   placeholder="your.email@powergrid.in"
-                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
+                  className="input-glow w-full"
                 />
               </div>
 
               {/* Phone */}
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-300">
+                <label className="block text-sm font-semibold mb-2 text-midnight-200">
                   Phone Number
                 </label>
                 <input
@@ -323,20 +323,20 @@ export default function NewTicket() {
                   value={formData.requester_phone}
                   onChange={handleChange}
                   placeholder="+91 XXXXX XXXXX"
-                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
+                  className="input-glow w-full"
                 />
               </div>
 
               {/* Category */}
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-300">
+                <label className="block text-sm font-semibold mb-2 text-midnight-200">
                   Category
                 </label>
                 <select
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:border-blue-500 focus:outline-none transition-colors appearance-none cursor-pointer"
+                  className="input-glow w-full appearance-none cursor-pointer"
                 >
                   <option value="general">General</option>
                   <option value="network">Network</option>
@@ -356,14 +356,14 @@ export default function NewTicket() {
 
               {/* Priority */}
               <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-300">
+                <label className="block text-sm font-semibold mb-2 text-midnight-200">
                   Priority
                 </label>
                 <select
                   name="priority"
                   value={formData.priority}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:border-blue-500 focus:outline-none transition-colors appearance-none cursor-pointer"
+                  className="input-glow w-full appearance-none cursor-pointer"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -376,7 +376,7 @@ export default function NewTicket() {
 
             {/* Description */}
             <div className="mb-6">
-              <label className="block text-sm font-semibold mb-2 text-gray-300">
+              <label className="block text-sm font-semibold mb-2 text-midnight-200">
                 Description <span className="text-red-400">*</span>
               </label>
               <textarea
@@ -386,7 +386,7 @@ export default function NewTicket() {
                 required
                 rows={6}
                 placeholder="Please provide detailed information about your issue, including any error messages, steps to reproduce, and what you've already tried..."
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:border-blue-500 focus:outline-none transition-colors resize-vertical"
+                className="input-glow w-full resize-vertical"
               />
             </div>
 
@@ -395,11 +395,11 @@ export default function NewTicket() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg glow-hover transition-all flex items-center space-x-2 font-semibold"
+                className="px-8 py-3 bg-midnight-800 hover:bg-midnight-700 disabled:opacity-50 disabled:cursor-not-allowed text-glow-white rounded-lg glow-hover transition-all flex items-center space-x-2 font-semibold border border-glow-white"
               >
                 {loading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-glow-white border-t-transparent rounded-full animate-spin" />
                     <span>Creating Ticket...</span>
                   </>
                 ) : (
