@@ -17,6 +17,8 @@ export default function ChatWidget() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showTicketConfirm, setShowTicketConfirm] = useState(false);
+  const [pendingTicketData, setPendingTicketData] = useState<any>(null);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -53,53 +55,42 @@ export default function ChatWidget() {
         if (aiResponse.ok) {
           const aiData = await aiResponse.json();
           if (aiData.response) {
-            setMessages(prev => [
-              ...prev,
-              { role: 'assistant', content: aiData.response }
-            ]);
-            setLoading(false);
-            return;
+            // Check if AI suggests creating a ticket
+            if (aiData.needsTicket) {
+              setMessages(prev => [
+                ...prev,
+                { role: 'assistant', content: aiData.response }
+              ]);
+              setPendingTicketData(aiData.ticketDetails || {
+                title: userMessage,
+                description: `Chatbot conversation: ${userMessage}`,
+                priority: 'medium',
+                category: 'general'
+              });
+              setShowTicketConfirm(true);
+              setLoading(false);
+              return;
+            } else {
+              // Normal AI response
+              setMessages(prev => [
+                ...prev,
+                { role: 'assistant', content: aiData.response }
+              ]);
+              setLoading(false);
+              return;
+            }
           }
         }
       } catch (aiError) {
         console.error('AI chat failed:', aiError);
-        // Fall back to ticket creation
+        // Fall back to normal response
       }
 
-      // If AI chat also fails, create a ticket
-      try {
-        const response = await fetch('/api/tickets', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: userMessage,
-            description: `Chatbot query: ${userMessage}`,
-            requester_email: 'chatbot@nullticket.com',
-            requester_name: 'Chatbot User'
-          }),
-        });
-
-        if (response.ok) {
-          const ticketData = await response.json();
-          setMessages(prev => [
-            ...prev,
-            {
-              role: 'assistant',
-              content: ticketData.ticket_number
-                ? `I've created ticket ${ticketData.ticket_number} for your issue. Our team will review it shortly.`
-                : ticketData.message || 'Thank you for your message. How else can I assist you?'
-            }
-          ]);
-        } else {
-          throw new Error('Failed to create ticket');
-        }
-      } catch (error) {
-        console.error('Failed to send message:', error);
-        setMessages(prev => [
-          ...prev,
-          { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }
-        ]);
-      }
+      // If AI chat fails, provide a generic response
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: 'I apologize, but I\'m having trouble connecting to my AI service right now. How else can I help you?' }
+      ]);
     } finally {
       setLoading(false);
     }
@@ -539,6 +530,58 @@ Need immediate hardware assistance? I can create an urgent support ticket.`;
     return null;
   };
 
+  // Handle ticket confirmation
+  const handleTicketConfirm = async (confirmed: boolean) => {
+    if (!confirmed) {
+      setShowTicketConfirm(false);
+      setPendingTicketData(null);
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: 'No problem! If you need help with anything else, feel free to ask.' }
+      ]);
+      return;
+    }
+
+    if (!pendingTicketData) return;
+
+    try {
+      setLoading(true);
+      const response = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: pendingTicketData.title,
+          description: pendingTicketData.description,
+          priority: pendingTicketData.priority || 'medium',
+          category: pendingTicketData.category || 'general'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create ticket');
+      }
+
+      const ticketData = await response.json();
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: `✅ **Ticket Created Successfully!**\n\n**Ticket ID:** ${ticketData.id}\n**Title:** ${ticketData.title}\n**Priority:** ${ticketData.priority}\n**Status:** ${ticketData.status}\n\nOur support team will review your ticket and get back to you soon. You can track the progress at: \`/tickets/${ticketData.id}\``
+        }
+      ]);
+    } catch (error) {
+      console.error('Ticket creation error:', error);
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: 'Sorry, I couldn\'t create the ticket right now. Please try again or contact support directly.' }
+      ]);
+    } finally {
+      setLoading(false);
+      setShowTicketConfirm(false);
+      setPendingTicketData(null);
+    }
+  };
+
   return (
     <>
       {/* Chat Button */}
@@ -630,6 +673,60 @@ Need immediate hardware assistance? I can create an urgent support ticket.`;
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Ticket Confirmation Modal */}
+      <AnimatePresence>
+        {showTicketConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            onClick={() => setShowTicketConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-900 border border-gray-700 rounded-2xl p-6 max-w-md mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-bold text-white mb-4">Create Support Ticket</h3>
+              <p className="text-gray-300 mb-6">
+                Based on your conversation, I can create a support ticket to help resolve this issue.
+                Our team will review it and get back to you.
+              </p>
+
+              {pendingTicketData && (
+                <div className="bg-gray-800 rounded-lg p-4 mb-6">
+                  <h4 className="font-semibold text-white mb-2">Ticket Details:</h4>
+                  <p className="text-sm text-gray-300">
+                    <strong>Title:</strong> {pendingTicketData.title}
+                  </p>
+                  <p className="text-sm text-gray-300 mt-1">
+                    <strong>Description:</strong> {pendingTicketData.description}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => handleTicketConfirm(false)}
+                  className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleTicketConfirm(true)}
+                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+                >
+                  Create Ticket
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
-}
+};
