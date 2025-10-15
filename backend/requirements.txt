@@ -16,10 +16,15 @@ psycopg2-binary==2.9.9
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-dotenv==1.0.0
+cryptography==42.0.5
 
 # Email Processing
 email-validator==2.1.0
 aiosmtplib==3.0.1
+
+# Background Tasks (for email polling)
+celery==5.3.4
+redis==5.0.1
 
 # API Integrations
 httpx==0.25.2
@@ -27,6 +32,14 @@ httpx==0.25.2
 # Utilities
 python-dateutil==2.8.2
 pytz==2023.3
+aiofiles==23.2.1
 
 # SMS (Optional)
 twilio==8.11.1
+
+# Testing
+pytest==8.0.0
+pytest-asyncio==0.23.5
+
+# Logging
+loguru==0.7.2
