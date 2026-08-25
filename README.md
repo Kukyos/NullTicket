@@ -59,6 +59,9 @@ npm install
 npm run dev
 ```
 
+> Note: `frontend/` contains a second copy of the same Next.js app. The root one
+> is the one wired up for deployment — `frontend/` can be ignored.
+
 On Windows, `start_all.bat` launches both.
 
 Minimum config is `GROQ_API_KEY` plus `DATABASE_URL` — SQLite works for
@@ -67,7 +70,7 @@ the Postgres path.
 
 ## Docs
 
-- [QUICKSTART.md](QUICKSTART.md) — 5-minute setup
+- [QUICKSTART.md](QUICKSTART.md) — setup walkthrough (note: its paths predate a repo reorg; use the commands above)
 - [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) — full architecture and feature breakdown
 - [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) — everything else
 - [backend/GMAIL_SMTP_SETUP.md](backend/GMAIL_SMTP_SETUP.md) — email ingestion setup
