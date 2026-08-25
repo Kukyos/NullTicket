@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NullTicket — POWERGRID Helpdesk
 
-## Getting Started
+**A unified, AI-routed ticketing system that ingests support requests from a
+chatbot, email, GLPI and Solman into one queue — then classifies and routes them
+without a human triaging first.**
 
-First, run the development server:
+Built on top of [NullChat](https://github.com/Kukyos/NullChat), extending a
+multilingual support chatbot into a full helpdesk backend.
+
+![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
+
+---
+
+## Why
+
+Support tickets arrive through four different channels and land in four
+different places. Someone has to read each one, guess a category, guess a
+priority, and forward it to the right team. NullTicket collapses that into a
+single ingestion path with an LLM doing the first pass.
+
+## What it does
+
+**Unified ingestion** — dedicated endpoints for chatbot, email, GLPI webhook and
+Solman webhook. Every ticket carries its source.
+
+**AI classification** — LLaMA 3.1 (via Groq) assigns one of 13 categories and one
+of 5 priority levels, with a confidence score and extracted keywords. Falls back
+to keyword matching when the model is unavailable.
+
+**Intelligent routing** — a 4-strategy engine: explicit rules, learned patterns,
+team load balancing, and category/keyword matching.
+
+**Admin dashboard** — ticket management, team assignment, knowledge base, and
+external-system integration status.
+
+Backed by 13 database models covering tickets, teams, routing rules, knowledge
+base articles and external system links.
+
+## Run it
+
+Requires Python 3.11+, Node.js 18+, and a free [Groq API key](https://console.groq.com).
+
+**Backend:**
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd backend
+python -m venv venv && source venv/bin/activate   # Windows: .\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+cp .env.example .env        # add GROQ_API_KEY
+uvicorn app.main:app --reload
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Frontend** (Next.js, at the repo root):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+On Windows, `start_all.bat` launches both.
 
-## Learn More
+Minimum config is `GROQ_API_KEY` plus `DATABASE_URL` — SQLite works for
+development; see [`migrate_to_postgres.py`](backend/migrate_to_postgres.py) for
+the Postgres path.
 
-To learn more about Next.js, take a look at the following resources:
+## Docs
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [QUICKSTART.md](QUICKSTART.md) — 5-minute setup
+- [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) — full architecture and feature breakdown
+- [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) — everything else
+- [backend/GMAIL_SMTP_SETUP.md](backend/GMAIL_SMTP_SETUP.md) — email ingestion setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Stack
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Next.js 15 · React 19 · Tailwind · Radix UI · FastAPI · SQLAlchemy · Groq (LLaMA 3.1) · SQLite/Postgres
